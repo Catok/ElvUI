@@ -321,7 +321,17 @@ function E:SendRecieve(event, prefix, message, channel, sender)
 			self:UnregisterEvent("CHAT_MSG_ADDON")
 		end
 	else
-		SendAddonMessage("ElvUI", E.version, "RAID")
+		local numParty, numRaid = GetNumPartyMembers(), GetNumRaidMembers();
+		local inInstance, instanceType = IsInInstance()
+		if inInstance and instanceType == 'pvp' or instanceType == 'arena' then
+			SendAddonMessage("ElvUI", E.version, "BATTLEGROUND")	
+		else
+			if numRaid > 0 then
+				SendAddonMessage("ElvUI", E.version, "RAID")
+			elseif numParty > 0 then
+				SendAddonMessage("ElvUI", E.version, "PARTY")
+			end
+		end
 	end
 end
 
@@ -347,7 +357,7 @@ function E:Initialize()
 	self:LoadMovers(); --Load Movers
 	
 	self.initialized = true
-
+	
 	if self.db.install_complete == nil or (self.db.install_complete and type(self.db.install_complete) == 'boolean') or (self.db.install_complete and type(tonumber(self.db.install_complete)) == 'number' and tonumber(self.db.install_complete) <= 3.05) then
 		self:Install()
 	end
@@ -355,6 +365,7 @@ function E:Initialize()
 	RegisterAddonMessagePrefix('ElvUI')
 	
 	self:UpdateMedia()
+	self:UpdateFrameTemplates()
 	self:CreateMoverPopup()
 	self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "CheckRole");
 	self:RegisterEvent("PLAYER_TALENT_UPDATE", "CheckRole");
@@ -365,6 +376,7 @@ function E:Initialize()
 	self:RegisterEvent("RAID_ROSTER_UPDATE", "SendRecieve")
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "SendRecieve")
 	self:RegisterEvent("CHAT_MSG_ADDON", "SendRecieve")
+	collectgarbage("collect");
 end
 
 local toggle
