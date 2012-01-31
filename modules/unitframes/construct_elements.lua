@@ -423,6 +423,8 @@ function UF:Construct_Combobar(frame)
 		
 		CPoints[i]:CreateBackdrop('Default')
 		CPoints[i].backdrop:SetParent(CPoints)
+		CPoints[i].backdrop:CreateShadow('Default')
+		CPoints[i].backdrop.shadow:Point("TOPLEFT", -4, 4)
 	end
 	
 	CPoints[1]:SetStatusBarColor(0.69, 0.31, 0.31)		
@@ -430,6 +432,10 @@ function UF:Construct_Combobar(frame)
 	CPoints[3]:SetStatusBarColor(0.65, 0.63, 0.35)
 	CPoints[4]:SetStatusBarColor(0.65, 0.63, 0.35)
 	CPoints[5]:SetStatusBarColor(0.33, 0.59, 0.33)	
+	
+	for i = 1, MAX_COMBO_POINTS do
+		CPoints[i].backdrop.shadow:SetBackdropBorderColor(CPoints[i]:GetStatusBarColor())
+	end
 	
 	return CPoints
 end
@@ -447,6 +453,7 @@ end
 
 function UF:Construct_RaidDebuffs(frame)
 	local rdebuff = CreateFrame('Frame', nil, frame)
+	rdebuff:SetFrameLevel(rdebuff:GetFrameLevel() + 5)
 	rdebuff:Point('BOTTOM', frame, 'BOTTOM', 0, 2)
 	rdebuff:SetTemplate("Default")
 	
@@ -509,7 +516,7 @@ function UF:Construct_ReadyCheckIcon(frame)
 	local f = CreateFrame('Frame', nil, frame)
 	f:SetFrameLevel(20)
 	
-	local tex = f:CreateTexture(nil, "OVERLAY")
+	local tex = f:CreateTexture(nil, "OVERLAY", nil, 7)
 	tex:Size(12)
 	tex:Point("BOTTOM", frame.Health, "BOTTOM", 0, 2)
 	
@@ -518,9 +525,8 @@ end
 
 function UF:Construct_RoleIcon(frame)
 	local f = CreateFrame('Frame', nil, frame)
-	f:SetFrameLevel(20)
 	
-	local tex = f:CreateTexture(nil, "OVERLAY")
+	local tex = f:CreateTexture(nil, "ARTWORK")
 	tex:Size(17)
 	tex:Point("BOTTOM", frame.Health, "BOTTOM", 0, 2)
 	tex.Override = UF.UpdateRoleIcon

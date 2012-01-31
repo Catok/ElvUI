@@ -55,7 +55,7 @@ local function Point(obj, arg1, arg2, arg3, arg4, arg5)
 	obj:SetPoint(arg1, arg2, arg3, arg4, arg5)
 end
 
-local function SetTemplate(f, t, glossTex)
+local function SetTemplate(f, t, glossTex, ignoreUpdates)
 	GetTemplate(t)
 	
 	f.template = t
@@ -117,7 +117,9 @@ local function SetTemplate(f, t, glossTex)
 	
 	f:SetBackdropBorderColor(borderr, borderg, borderb)
 	
-	E["frames"][f] = true
+	if not ignoreUpdates then
+		E["frames"][f] = true
+	end
 end
 
 local function CreateBackdrop(f, t, tex)
@@ -191,7 +193,7 @@ local function FontTemplate(fs, font, fontSize, fontStyle)
 	if not font then font = LSM:Fetch("font", E.db["core"].font) end
 	if not fontSize then fontSize = E.db.core.fontsize end
 	fs:SetFont(font, fontSize, fontStyle)
-	fs:SetShadowColor(0, 0, 0, 0.4)
+	fs:SetShadowColor(0, 0, 0, 1)
 	fs:SetShadowOffset((E.mult or 1), -(E.mult or 1))
 	
 	E["texts"][fs] = true

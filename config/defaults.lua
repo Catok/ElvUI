@@ -18,13 +18,13 @@ DF["core"] = {
 	["dmgfont"] = "ElvUI Combat",
 		
 	-- textures
-	["normTex"] = "ElvUI Norm",
-	["glossTex"] = "ElvUI Gloss",
+	["normTex"] = "Minimalist",
+	["glossTex"] = "Minimalist",
 	
 	--colors
-	["bordercolor"] = { r = .23,g = .23,b = .23 },
-	["backdropcolor"] = { r = .07,g = .07,b = .07 },
-	["backdropfadecolor"] = { r = .07,g = .07,b = .07, a = 0.9 },
+	["bordercolor"] = { r = .31,g = .31,b = .31 },
+	["backdropcolor"] = { r = .1,g = .1,b = .1 },
+	["backdropfadecolor"] = { r = .06,g = .06,b = .06, a = 0.9 },
 	["valuecolor"] = {r = 23/255,g = 132/255,b = 209/255},
 	
 	--panels
@@ -104,6 +104,7 @@ DF['classtimer'] = {
 
 --Skins
 DF['skins'] = {
+	['embedRight'] = '',
 	['bigwigs'] = {
 		['enable'] = true,
 		['spacing'] = 7,
@@ -126,6 +127,9 @@ DF['skins'] = {
 	['skada'] = {
 		['enable'] = true,
 	},		
+	['tinydps'] = {
+		['enable'] = true,
+	},			
 	['blizzard'] = {
 		['enable'] = true,
 		["bags"] = true,
@@ -229,7 +233,7 @@ DF['tooltip'] = {
 DF['unitframe'] = {
 	['enable'] = true,
 	['smoothbars'] = true,
-	['statusbar'] = 'ElvUI Norm',
+	['statusbar'] = "Minimalist",
 	['font'] = 'ElvUI Font',
 	['fontsize'] = 12,
 	['fontoutline'] = 'OUTLINE',
@@ -1114,7 +1118,8 @@ DF['unitframe'] = {
 				},
 				['debuffs'] = {
 					["anchorPoint"] = "BOTTOMLEFT",
-					["initialAnchor"] = "TOPLEFT",					
+					["initialAnchor"] = "TOPLEFT",
+					['useFilter'] = 'DebuffBlacklist',		
 				},
 				['petsGroup'] = {
 					['enable'] = true,
@@ -1156,9 +1161,6 @@ DF["actionbar"] = {
 	["enable"] = true,
 	["macrotext"] = false,
 	["hotkeytext"] = true,
-	["buttonsize"] = 30,
-	["altbuttonsize"] = 28,
-	["buttonspacing"] = 4,
 	['fontsize'] = 11,
 	["enablecd"] = true,
 	["treshold"] = 3,
@@ -1176,6 +1178,8 @@ DF["actionbar"] = {
 		['backdrop'] = true,
 		['heightMult'] = 1,
 		['widthMult'] = 1,
+		["buttonsize"] = 30,
+		["buttonspacing"] = 4,		
 		['paging'] = {
 			["DRUID"] = "[bonusbar:1,nostealth] 7; [bonusbar:1,stealth] 8; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10;",
 			["WARRIOR"] = "[bonusbar:1] 7; [bonusbar:2] 8; [bonusbar:3] 9;",
@@ -1193,6 +1197,8 @@ DF["actionbar"] = {
 		['backdrop'] = false,
 		['heightMult'] = 1,
 		['widthMult'] = 1,
+		["buttonsize"] = 30,
+		["buttonspacing"] = 4,		
 		['paging'] = {},
 		['visibility'] = "[vehicleui] hide;show",
 	},
@@ -1205,6 +1211,8 @@ DF["actionbar"] = {
 		['backdrop'] = true,
 		['heightMult'] = 1,
 		['widthMult'] = 1,
+		["buttonsize"] = 30,
+		["buttonspacing"] = 4,
 		['paging'] = {},
 		['visibility'] = "[vehicleui] hide;show",
 	},
@@ -1217,6 +1225,8 @@ DF["actionbar"] = {
 		['backdrop'] = true,
 		['heightMult'] = 1,
 		['widthMult'] = 1,
+		["buttonsize"] = 30,
+		["buttonspacing"] = 4,
 		['paging'] = {},
 		['visibility'] = "[vehicleui] hide;show",
 	},
@@ -1229,6 +1239,8 @@ DF["actionbar"] = {
 		['backdrop'] = true,
 		['heightMult'] = 1,
 		['widthMult'] = 1,
+		["buttonsize"] = 30,
+		["buttonspacing"] = 4,
 		['paging'] = {},
 		['visibility'] = "[vehicleui] hide;show",
 	},
@@ -1241,6 +1253,8 @@ DF["actionbar"] = {
 		['backdrop'] = true,
 		['heightMult'] = 1,
 		['widthMult'] = 1,
+		["buttonsize"] = 30,
+		["buttonspacing"] = 4,
 		['visibility'] = "[pet,novehicleui,nobonusbar:5] show;hide",
 	},
 	['barShapeShift'] = {
@@ -1252,6 +1266,8 @@ DF["actionbar"] = {
 		['backdrop'] = false,
 		['heightMult'] = 1,
 		['widthMult'] = 1,
+		["buttonsize"] = 30,
+		["buttonspacing"] = 4,
 	},
 	['barTotem'] = {
 		['enabled'] = true,
