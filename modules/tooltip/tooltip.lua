@@ -541,9 +541,9 @@ function TT:GameTooltip_OnTooltipSetItem(tt)
 			left = "|cFFCA3C3C"..ID.."|r "..link:match(":(%w+)")
 		end
 		
-		if num > 1  then
-			right = "|cFFCA3C3C"..L['Count'].."|r "..num
-		end
+		--if num > 1  then
+		--	right = "|cFFCA3C3C"..L['Count'].."|r "..num
+		--end
 		
 		if left ~= "" or right ~= "" then
 			tt:AddLine(" ")

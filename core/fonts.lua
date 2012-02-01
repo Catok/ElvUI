@@ -62,8 +62,8 @@ function E:UpdateBlizzardFonts()
 	SetFont(SystemFont_Shadow_Small,            NORMAL, self.db.core.fontsize*0.9)
 	SetFont(SystemFont_Small,                   NORMAL, self.db.core.fontsize)
 	SetFont(SystemFont_Tiny,                    NORMAL, self.db.core.fontsize)
-	SetFont(Tooltip_Med,                        NORMAL, self.db.core.fontsize)
-	SetFont(Tooltip_Small,                      NORMAL, self.db.core.fontsize)
+	SetFont(Tooltip_Med,                        NORMAL, 11) --self.db.core.fontsize
+	SetFont(Tooltip_Small,                      NORMAL, 11) --self.db.core.fontsize
 	SetFont(ZoneTextString,						NORMAL, 32, "OUTLINE")
 	SetFont(SubZoneTextString,					NORMAL, 25, "OUTLINE")
 	SetFont(PVPInfoTextString,					NORMAL, 22, "OUTLINE")
