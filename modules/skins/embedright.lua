@@ -9,6 +9,7 @@ S.AddonPoints = {
 }
 
 function S:EmbedSkadaWindow(window, width, barheight, height, point, relativeFrame, relativePoint, ofsx, ofsy)
+	local barheight = 14
 	window.db.barwidth = width
 	window.db.barheight = barheight
 	if window.db.enabletitle then 
@@ -78,7 +79,7 @@ function S:EmbedSkada()
 	local borderWidth = E:Scale(2)
 	local widthOffset = 4
 	local heightOffset = 33
-	local numBars = 8
+	local numBars = 9
 	
 	if E.db.core.panelBackdrop == 'SHOWBOTH' or E.db.core.panelBackdrop == 'SHOWRIGHT' then
 		widthOffset = 14
@@ -92,8 +93,8 @@ function S:EmbedSkada()
 	if #skadaWindows == 1 then
 		self:EmbedSkadaWindow(skadaWindows[1], E.db.core.panelWidth - widthOffset, (E.db.core.panelHeight - ((barSpacing * skadaWindows[1].db.barheight) + barSpacing * (numBars - 1))) / numBars, E.db.core.panelHeight - heightOffset, "BOTTOMRIGHT", RightChatToggleButton, "TOPRIGHT", -2, 6)
 	elseif #skadaWindows == 2 then
-		self:EmbedSkadaWindow(skadaWindows[1], ((E.db.core.panelWidth - widthOffset) / 2) - (borderWidth + E.mult) + 1, (E.db.core.panelHeight - ((barSpacing * skadaWindows[1].db.barheight) + barSpacing * (numBars - 1))) / numBars, E.db.core.panelHeight - heightOffset,  "BOTTOMRIGHT", RightChatToggleButton, "TOPRIGHT", -2, 6)
-		self:EmbedSkadaWindow(skadaWindows[2], ((E.db.core.panelWidth - widthOffset) / 2) - (borderWidth + E.mult), (E.db.core.panelHeight - ((barSpacing * skadaWindows[2].db.barheight) + barSpacing * (numBars - 1))) / numBars, E.db.core.panelHeight - heightOffset,  "BOTTOMLEFT", RightChatDataPanel, "TOPLEFT", 2, 6)
+		self:EmbedSkadaWindow(skadaWindows[1], ((E.db.core.panelWidth - widthOffset) * 0.55) - (borderWidth + E.mult) + 1, (E.db.core.panelHeight - ((barSpacing * skadaWindows[1].db.barheight) + barSpacing * (numBars - 1))) / numBars, E.db.core.panelHeight - heightOffset,  "BOTTOMRIGHT", RightChatToggleButton, "TOPRIGHT", -2, 6)
+		self:EmbedSkadaWindow(skadaWindows[2], ((E.db.core.panelWidth - widthOffset) * 0.45) - (borderWidth + E.mult), (E.db.core.panelHeight - ((barSpacing * skadaWindows[2].db.barheight) + barSpacing * (numBars - 1))) / numBars, E.db.core.panelHeight - heightOffset,  "BOTTOMLEFT", RightChatDataPanel, "TOPLEFT", 2, 6)
 	elseif #skadaWindows > 2 then
 		self:EmbedSkadaWindow(skadaWindows[1], ((E.db.core.panelWidth - widthOffset) / 2) - (borderWidth + E.mult) + 1, (E.db.core.panelHeight - ((barSpacing * skadaWindows[1].db.barheight) + barSpacing * (numBars - 1))) / numBars, E.db.core.panelHeight - heightOffset,  "BOTTOMRIGHT", RightChatToggleButton, "TOPRIGHT", -2, 6)
 		self:EmbedSkadaWindow(skadaWindows[2], ((E.db.core.panelWidth - widthOffset) / 2) - (borderWidth + E.mult), (E.db.core.panelHeight - ((barSpacing * skadaWindows[2].db.barheight) + barSpacing * (numBars - 1))) / numBars, (E.db.core.panelHeight - heightOffset) / 2 - 3,  "BOTTOMLEFT", RightChatDataPanel, "TOPLEFT", 2, 6)
