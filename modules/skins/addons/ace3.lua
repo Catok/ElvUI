@@ -1,4 +1,4 @@
-local E, L, DF = unpack(select(2, ...)); --Engine
+local E, L, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, ProfileDB, GlobalDB
 local S = E:GetModule('Skins')
 
 --if not ANonBuggyFuckingSkin then return end
@@ -155,7 +155,7 @@ end
 local function SkinAce3()
 	local oldRegisterAsWidget = AceGUI.RegisterAsWidget
 	AceGUI.RegisterAsWidget = function(self, widget)
-		if not E.db.skins.ace3.enable then
+		if not E.global.skins.ace3.enable then
 			return oldRegisterAsWidget(self, widget)
 		end
 		local TYPE = widget.type
@@ -307,7 +307,7 @@ local function SkinAce3()
 	local oldRegisterAsContainer = AceGUI.RegisterAsContainer
 
 	AceGUI.RegisterAsContainer = function(self, widget)
-		if not E.db.skins.ace3.enable then
+		if not E.global.skins.ace3.enable then
 			return oldRegisterAsContainer(self, widget)
 		end	
 		local TYPE = widget.type

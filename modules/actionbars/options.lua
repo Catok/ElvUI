@@ -1,4 +1,4 @@
-local E, L, DF = unpack(select(2, ...)); --Engine
+local E, L, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, ProfileDB, GlobalDB
 local AB = E:GetModule('ActionBars')
 local group
 
@@ -18,7 +18,7 @@ local function BuildABConfig()
 			type = 'group',
 			order = 200,
 			guiInline = false,
-			disabled = function() return not E.db.actionbar.enable end,
+			disabled = function() return not E.global.actionbar.enable end,
 			get = function(info) return E.db.actionbar['bar'..i][ info[#info] ] end,
 			set = function(info, value) E.db.actionbar['bar'..i][ info[#info] ] = value; AB:UpdateButtonSettings() end,
 			args = {
@@ -32,7 +32,7 @@ local function BuildABConfig()
 					type = 'execute',
 					name = L['Restore Bar'],
 					desc = L['Restore the actionbars default settings'],
-					func = function() E.db.actionbar['bar'..i] = DF.actionbar['bar'..i]; AB:ResetMovers('bar'..i); AB:UpdateButtonSettings() end,
+					func = function() E.db.actionbar['bar'..i] = P.actionbar['bar'..i]; AB:ResetMovers('bar'..i); AB:UpdateButtonSettings() end,
 				},	
 				point = {
 					order = 3,
@@ -73,7 +73,7 @@ local function BuildABConfig()
 					desc = L['The size of the action buttons.'],
 					min = 15, max = 60, step = 1,
 					order = 8,
-					disabled = function() return not E.db.actionbar.enable end,
+					disabled = function() return not E.global.actionbar.enable end,
 				},
 				buttonspacing = {
 					type = 'range',
@@ -81,7 +81,7 @@ local function BuildABConfig()
 					desc = L['The spacing between buttons.'],
 					min = 1, max = 10, step = 1,	
 					order = 9, 
-					disabled = function() return not E.db.actionbar.enable end,
+					disabled = function() return not E.global.actionbar.enable end,
 				},				
 				heightMult = {
 					order = 10,
@@ -136,7 +136,7 @@ local function BuildABConfig()
 		type = 'group',
 		order = 200,
 		guiInline = false,
-		disabled = function() return not E.db.actionbar.enable end,
+		disabled = function() return not E.global.actionbar.enable end,
 		get = function(info) return E.db.actionbar['barPet'][ info[#info] ] end,
 		set = function(info, value) E.db.actionbar['barPet'][ info[#info] ] = value; AB:UpdateButtonSettings() end,
 		args = {
@@ -150,7 +150,7 @@ local function BuildABConfig()
 				type = 'execute',
 				name = L['Restore Bar'],
 				desc = L['Restore the actionbars default settings'],
-				func = function() E.db.actionbar['barPet'] = DF.actionbar['barPet']; AB:ResetMovers('barPet'); AB:UpdateButtonSettings() end,
+				func = function() E.db.actionbar['barPet'] = P.actionbar['barPet']; AB:ResetMovers('barPet'); AB:UpdateButtonSettings() end,
 			},	
 			point = {
 				order = 3,
@@ -191,7 +191,7 @@ local function BuildABConfig()
 				desc = L['The size of the action buttons.'],
 				min = 15, max = 60, step = 1,
 				order = 8,
-				disabled = function() return not E.db.actionbar.enable end,
+				disabled = function() return not E.global.actionbar.enable end,
 			},
 			buttonspacing = {
 				type = 'range',
@@ -199,7 +199,7 @@ local function BuildABConfig()
 				desc = L['The spacing between buttons.'],
 				min = 1, max = 10, step = 1,	
 				order = 9, 
-				disabled = function() return not E.db.actionbar.enable end,
+				disabled = function() return not E.global.actionbar.enable end,
 			},				
 			heightMult = {
 				order = 10,
@@ -235,7 +235,7 @@ local function BuildABConfig()
 		type = 'group',
 		order = 200,
 		guiInline = false,
-		disabled = function() return not E.db.actionbar.enable end,
+		disabled = function() return not E.global.actionbar.enable end,
 		get = function(info) return E.db.actionbar['barShapeShift'][ info[#info] ] end,
 		set = function(info, value) E.db.actionbar['barShapeShift'][ info[#info] ] = value; AB:UpdateButtonSettings() end,
 		args = {
@@ -249,7 +249,7 @@ local function BuildABConfig()
 				type = 'execute',
 				name = L['Restore Bar'],
 				desc = L['Restore the actionbars default settings'],
-				func = function() E.db.actionbar['barShapeShift'] = DF.actionbar['barShapeShift']; AB:ResetMovers('barShapeShift'); AB:UpdateButtonSettings() end,
+				func = function() E.db.actionbar['barShapeShift'] = P.actionbar['barShapeShift']; AB:ResetMovers('barShapeShift'); AB:UpdateButtonSettings() end,
 			},	
 			point = {
 				order = 3,
@@ -290,7 +290,7 @@ local function BuildABConfig()
 				desc = L['The size of the action buttons.'],
 				min = 15, max = 60, step = 1,
 				order = 8,
-				disabled = function() return not E.db.actionbar.enable end,
+				disabled = function() return not E.global.actionbar.enable end,
 			},
 			buttonspacing = {
 				type = 'range',
@@ -298,7 +298,7 @@ local function BuildABConfig()
 				desc = L['The spacing between buttons.'],
 				min = 1, max = 10, step = 1,	
 				order = 9, 
-				disabled = function() return not E.db.actionbar.enable end,
+				disabled = function() return not E.global.actionbar.enable end,
 			},				
 			heightMult = {
 				order = 10,
@@ -321,7 +321,7 @@ local function BuildABConfig()
 		type = "group",
 		order = 500,
 		name = L['Cooldown Text'],
-		disabled = function() return not E.db.actionbar.enable or not E.db.actionbar.enablecd end,
+		disabled = function() return not E.global.actionbar.enable or not E.db.actionbar.enablecd end,
 		set = function(info, value) E.db.actionbar[ info[#info] ] = value; AB:UpdateCooldownSettings() end,
 		args = {
 			enablecd = {
@@ -329,7 +329,7 @@ local function BuildABConfig()
 				order = 1,
 				name = L['Enable'],
 				desc = L['Display cooldown text on anything with the cooldown spiril.'],
-				disabled = function() return not E.db.actionbar.enable end,
+				disabled = function() return not E.global.actionbar.enable end,
 			},			
 			treshold = {
 				type = 'range',
@@ -343,11 +343,11 @@ local function BuildABConfig()
 				name = L["Restore Defaults"],
 				order = 3,
 				func = function() 
-					self.db.expiringcolor = DF['actionbar'].expiringcolor;
-					self.db.secondscolor = DF['actionbar'].secondscolor;
-					self.db.minutescolor = DF['actionbar'].minutescolor;
-					self.db.hourscolor = DF['actionbar'].hourscolor;
-					self.db.dayscolor = DF['actionbar'].dayscolor;
+					self.db.expiringcolor = P['actionbar'].expiringcolor;
+					self.db.secondscolor = P['actionbar'].secondscolor;
+					self.db.minutescolor = P['actionbar'].minutescolor;
+					self.db.hourscolor = P['actionbar'].hourscolor;
+					self.db.dayscolor = P['actionbar'].dayscolor;
 					AB:UpdateCooldownSettings();
 				end,
 			},
@@ -441,7 +441,7 @@ local function BuildABConfig()
 			type = 'group',
 			order = 200,
 			guiInline = false,
-			disabled = function() return not E.db.actionbar.enable or not E.myclass == "SHAMAN" end,
+			disabled = function() return not E.global.actionbar.enable or not E.myclass == "SHAMAN" end,
 			get = function(info) return E.db.actionbar['barTotem'][ info[#info] ] end,
 			set = function(info, value) E.db.actionbar['barTotem'][ info[#info] ] = value; AB:AdjustTotemSettings() end,
 			args = {
@@ -455,7 +455,7 @@ local function BuildABConfig()
 					type = 'execute',
 					name = L['Restore Bar'],
 					desc = L['Restore the actionbars default settings'],
-					func = function() E.db.actionbar['barTotem'] = DF.actionbar['barTotem']; AB:ResetMovers('barTotem'); AB:AdjustTotemSettings() end,
+					func = function() E.db.actionbar['barTotem'] = P.actionbar['barTotem']; AB:ResetMovers('barTotem'); AB:AdjustTotemSettings() end,
 				},			
 				mouseover = {
 					order = 3,
@@ -479,35 +479,36 @@ E.Options.args.actionbar = {
 			order = 1,
 			type = "toggle",
 			name = L["Enable"],
-			set = function(info, value) E.db.actionbar[ info[#info] ] = value; StaticPopup_Show("CONFIG_RL") end
+			get = function(info) return E.global.actionbar[ info[#info] ] end,
+			set = function(info, value) E.global.actionbar[ info[#info] ] = value; StaticPopup_Show("GLOBAL_RL") end
 		},
 		toggleAnchors = {
 			order = 2,
 			type = "execute",
 			name = L["Toggle Anchors"],
 			func = function() E:MoveUI(true, 'actionbars'); end,
-			disabled = function() return not E.db.actionbar.enable end,
+			disabled = function() return not E.global.actionbar.enable end,
 		},
 		toggleKeybind = {
 			order = 3,
 			type = "execute",
 			name = L["Keybind Mode"],
 			func = function() AB:ActivateBindMode(); E:ToggleConfig(); GameTooltip:Hide(); end,
-			disabled = function() return not E.db.actionbar.enable; end,
+			disabled = function() return not E.global.actionbar.enable end,
 		},		
 		macrotext = {
 			type = "toggle",
 			name = L['Macro Text'],
 			desc = L['Display macro names on action buttons.'],
 			order = 4,
-			disabled = function() return not E.db.actionbar.enable end,
+			disabled = function() return not E.global.actionbar.enable end,
 		},
 		hotkeytext = {
 			type = "toggle",
 			name = L['Keybind Text'],
 			desc = L['Display bind names on action buttons.'],	
 			order = 5,
-			disabled = function() return not E.db.actionbar.enable end,
+			disabled = function() return not E.global.actionbar.enable end,
 		},
 		fontsize = {
 			type = 'range',
@@ -515,7 +516,7 @@ E.Options.args.actionbar = {
 			desc = L['Set the font size of the action buttons.'],
 			min = 5, max = 18, step = 1,
 			order = 6,
-			disabled = function() return not E.db.actionbar.enable end,
+			disabled = function() return not E.global.actionbar.enable end,
 		},		
 	},
 }

@@ -1,4 +1,4 @@
-local E, L, DF = unpack(select(2, ...)); --Engine
+local E, L, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, ProfileDB, GlobalDB
 local AB = E:GetModule('ActionBars');
 
 local bind = CreateFrame("Frame", "ElvUI_KeyBinder", E.UIParent);
@@ -13,10 +13,10 @@ end
 
 function AB:DeactivateBindMode(save)
 	if save then
-		SaveBindings(2);
+		SaveBindings(GetCurrentBindingSet());
 		E:Print(L['Binds Saved']);
 	else
-		LoadBindings(2);
+		LoadBindings(GetCurrentBindingSet());
 		E:Print(L['Binds Discarded']);
 	end
 	bind.active = false;

@@ -1,4 +1,4 @@
-local E, L, DF = unpack(select(2, ...)); --Engine
+local E, L, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, ProfileDB, GlobalDB
 local UF = E:GetModule('UnitFrames');
 
 local _, ns = ...
@@ -22,7 +22,7 @@ function UF:Construct_AssistFrames(unitGroup)
 	
 	self.RaidIcon = UF:Construct_RaidIcon(self)
 	
-	UF:Update_AssistFrames(self, E.db['unitframe']['layouts'][UF.ActiveLayout]['assist'])
+	UF:Update_AssistFrames(self, E.db['unitframe']['units']['assist'])
 	UF:Update_StatusBars()
 	UF:Update_FontStrings()	
 	

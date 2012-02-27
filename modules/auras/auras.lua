@@ -1,4 +1,4 @@
-local E, L, DF = unpack(select(2, ...)); --Engine
+local E, L, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, ProfileDB, GlobalDB
 local A = E:NewModule('Auras', 'AceHook-3.0', 'AceEvent-3.0');
 
 local warningTime = 5
@@ -188,7 +188,7 @@ end
 
 function A:Initialize()
 	self.db = E.db.auras
-	if self.db.enable ~= true then 
+	if E.global.auras.enable ~= true then 
 		BuffFrame:Kill();
 		return 
 	end
@@ -232,6 +232,9 @@ function A:Initialize()
 	self:SecureHook("BuffFrame_UpdateAllBuffAnchors", "UpdateBuffAnchors")
 	self:SecureHook("DebuffButton_UpdateAnchors", "UpdateDebuffAnchors")	
 	E:CreateMover(AurasHolder, "AurasMover", "Auras Frame", false, A.AurasPostDrag)
+	AurasHolder.ClearAllPoints = E.noop
+	AurasHolder.SetPoint = E.noop
+	AurasHolder.SetAllPoints = E.noop
 end
 
 E:RegisterModule(A:GetName())

@@ -1,4 +1,4 @@
-local E, L, DF = unpack(select(2, ...)); --Engine
+local E, L, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, ProfileDB, GlobalDB
 local LSM = LibStub("LibSharedMedia-3.0")
 
 local floor = math.floor
@@ -190,8 +190,8 @@ local function FontTemplate(fs, font, fontSize, fontStyle)
 	fs.fontSize = fontSize
 	fs.fontStyle = fontStyle
 	
-	if not font then font = LSM:Fetch("font", E.db["core"].font) end
-	if not fontSize then fontSize = E.db.core.fontsize end
+	if not font then font = LSM:Fetch("font", E.db['general'].font) end
+	if not fontSize then fontSize = E.db.general.fontsize end
 	fs:SetFont(font, fontSize, fontStyle)
 	if fontStyle then
 		fs:SetShadowColor(0, 0, 0, 0.2)

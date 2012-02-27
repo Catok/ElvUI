@@ -1,4 +1,4 @@
-local E, L, DF = unpack(select(2, ...)); --Engine
+local E, L, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, ProfileDB, GlobalDB
 local UF = E:GetModule('UnitFrames');
 local LSM = LibStub("LibSharedMedia-3.0");
 
@@ -28,6 +28,16 @@ function UF:Construct_ThreatGlow(frame, glow)
 	threat.Override = self.UpdateThreat
 	threat:SetFrameStrata('BACKGROUND')
 	return threat
+end
+
+function UF:Construct_TargetGlow(frame)
+	frame:CreateShadow('Default')
+	local x = frame.shadow
+	frame.shadow = nil
+	x:SetFrameStrata('BACKGROUND')
+	x:Hide();
+	
+	return x
 end
 
 function UF:Construct_HealthBar(frame, bg, text, textPos)

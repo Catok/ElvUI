@@ -1,4 +1,4 @@
-local E, L, DF = unpack(select(2, ...)); --Engine
+local E, L, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, ProfileDB, GlobalDB
 local UF = E:GetModule('UnitFrames');
 
 local _, ns = ...
@@ -253,7 +253,7 @@ function UF:Update_TargetTargetFrame(frame, db)
 		end
 	end	
 	
-	frame.snapOffset = -(12 + self.db['layouts'][UF.ActiveLayout].player.castbar.height)
+	frame.snapOffset = -(12 + self.db['units'].player.castbar.height)
 	
 	if not frame.mover then
 		frame:ClearAllPoints()

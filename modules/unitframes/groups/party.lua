@@ -1,4 +1,4 @@
-local E, L, DF = unpack(select(2, ...)); --Engine
+local E, L, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, ProfileDB, GlobalDB
 local UF = E:GetModule('UnitFrames');
 
 local _, ns = ...
@@ -12,7 +12,6 @@ function UF:Construct_PartyFrames(unitGroup)
 	
 	if self.isChild then
 		self.Health = UF:Construct_HealthBar(self, true)
-		self.Health.frequentUpdates = true;	
 		
 		self.Name = UF:Construct_NameText(self)
 		self.originalParent = self:GetParent()
@@ -20,9 +19,10 @@ function UF:Construct_PartyFrames(unitGroup)
 		self.menu = UF.SpawnMenu
 		
 		self.Health = UF:Construct_HealthBar(self, true, true, 'RIGHT')
-		self.Health.frequentUpdates = true;
-		
+
 		self.Power = UF:Construct_PowerBar(self, true, true, 'LEFT', false)
+		self.Power.frequentUpdates = false;
+		
 		self.Name = UF:Construct_NameText(self)
 		self.Buffs = UF:Construct_Buffs(self)
 		self.Debuffs = UF:Construct_Debuffs(self)
@@ -30,9 +30,10 @@ function UF:Construct_PartyFrames(unitGroup)
 		self.DebuffHighlight = UF:Construct_DebuffHighlight(self)
 		self.ResurrectIcon = UF:Construct_ResurectionIcon(self)
 		self.LFDRole = UF:Construct_RoleIcon(self)
-		
+		self.TargetGlow = UF:Construct_TargetGlow(self)
 		table.insert(self.__elements, UF.UpdateThreat)
-		self:RegisterEvent('PLAYER_TARGET_CHANGED', UF.UpdateThreat)
+		self:RegisterEvent('PLAYER_TARGET_CHANGED', function(...) UF.UpdateThreat(...); UF.UpdateTargetGlow(...) end)
+		self:RegisterEvent('PLAYER_ENTERING_WORLD', UF.UpdateTargetGlow)
 		self:RegisterEvent('UNIT_THREAT_LIST_UPDATE', UF.UpdateThreat)
 		self:RegisterEvent('UNIT_THREAT_SITUATION_UPDATE', UF.UpdateThreat)	
 		
@@ -41,7 +42,7 @@ function UF:Construct_PartyFrames(unitGroup)
 		self.HealPrediction = UF:Construct_HealComm(self)
 	end
 	
-	UF:Update_PartyFrames(self, E.db['unitframe']['layouts'][UF.ActiveLayout]['party'])
+	UF:Update_PartyFrames(self, E.db['unitframe']['units']['party'])
 	UF:Update_StatusBars()
 	UF:Update_FontStrings()	
 
@@ -64,9 +65,12 @@ function UF:PartySmartVisibility(event)
 		end
 	else
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		return
 	end
 	
-	UF:UpdateGroupChildren(self, self.db)
+	if event == 'PARTY_MEMBERS_CHANGED' then
+		UF:UpdateGroupChildren(self, self.db)
+	end
 end
 
 function UF:Update_PartyHeader(header, db)
@@ -184,7 +188,8 @@ function UF:Update_PartyFrames(frame, db)
 		do
 			local health = frame.Health
 			health.Smooth = self.db.smoothbars
-
+			health.frequentUpdates = db.health.frequentUpdates
+			
 			--Colors
 			health.colorSmooth = nil
 			health.colorHealth = nil
@@ -234,7 +239,7 @@ function UF:Update_PartyFrames(frame, db)
 			local x, y = self:GetPositionOffset(db.health.position)
 			health.value:ClearAllPoints()
 			health.value:Point(db.health.position, health, db.health.position, x, y)
-			
+			health.frequentUpdates = db.health.frequentUpdates
 			--Colors
 			health.colorSmooth = nil
 			health.colorHealth = nil
@@ -337,6 +342,29 @@ function UF:Update_PartyFrames(frame, db)
 				power.value:Hide()
 			end
 		end
+		
+		--Target Glow
+		do
+			local tGlow = frame.TargetGlow
+			tGlow:ClearAllPoints()
+			tGlow:Point("TOPLEFT", -4, 4)
+			tGlow:Point("TOPRIGHT", 4, 4)
+			
+			if USE_MINI_POWERBAR then
+				tGlow:Point("BOTTOMLEFT", -4, -4 + (POWERBAR_HEIGHT/2))
+				tGlow:Point("BOTTOMRIGHT", 4, -4 + (POWERBAR_HEIGHT/2))		
+			else
+				tGlow:Point("BOTTOMLEFT", -4, -4)
+				tGlow:Point("BOTTOMRIGHT", 4, -4)
+			end
+			
+			if USE_POWERBAR_OFFSET then
+				tGlow:Point("TOPLEFT", -4+POWERBAR_OFFSET, 4)
+				tGlow:Point("TOPRIGHT", 4, 4)
+				tGlow:Point("BOTTOMLEFT", -4+POWERBAR_OFFSET, -4+POWERBAR_OFFSET)
+				tGlow:Point("BOTTOMRIGHT", 4, -4+POWERBAR_OFFSET)				
+			end				
+		end		
 
 		--Auras Disable/Enable
 		--Only do if both debuffs and buffs aren't being used.
