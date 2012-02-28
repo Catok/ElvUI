@@ -61,6 +61,19 @@ function E:ElvSays(msg)
 	SendAddonMessage('ElvSays', msg, channel, target)
 end
 
+function E:EGrid(msg)
+	if (msg) and (type(tonumber(msg))=="number") then
+		E.db.gridSize = (msg)
+		E:Grid_Show()
+	else 
+		if EGrid then		
+			E:Grid_Hide()
+		else 
+			E:Grid_Show()
+		end
+	end
+end
+
 function E:LoadCommands()
 	self:RegisterChatCommand("ec", "ToggleConfig")
 	self:RegisterChatCommand("elvui", "ToggleConfig")
@@ -74,6 +87,7 @@ function E:LoadCommands()
 	self:RegisterChatCommand('elvsays', 'ElvSays')
 	self:RegisterChatCommand('elvsayschannel', 'ElvSaysChannel')
 	self:RegisterChatCommand('elvsaystarget', 'ElvSaysTarget')
+	self:RegisterChatCommand('egrid', 'EGrid')
 	if E.ActionBars then
 		self:RegisterChatCommand('kb', E.ActionBars.ActivateBindMode)
 	end
