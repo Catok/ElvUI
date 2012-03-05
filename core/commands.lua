@@ -37,7 +37,12 @@ function FarmMode()
 	end
 end
 
-function E:FarmMode()
+function E:FarmMode(msg)
+	if msg and type(tonumber(msg))=="number" and tonumber(msg) <= 500 and tonumber(msg) >= 20 then
+		E.db.farmSize = tonumber(msg)
+		FarmModeMap:Size(tonumber(msg))
+	end
+	
 	FarmMode()
 end
 
@@ -61,9 +66,9 @@ function E:ElvSays(msg)
 	SendAddonMessage('ElvSays', msg, channel, target)
 end
 
-function E:EGrid(msg)
-	if (msg) and (type(tonumber(msg))=="number") then
-		E.db.gridSize = (msg)
+function E:Grid(msg)
+	if msg and type(tonumber(msg))=="number" and tonumber(msg) <= 256 and tonumber(msg) >= 4 then
+		E.db.gridSize = msg
 		E:Grid_Show()
 	else 
 		if EGrid then		
@@ -78,6 +83,7 @@ function E:LoadCommands()
 	self:RegisterChatCommand("ec", "ToggleConfig")
 	self:RegisterChatCommand("elvui", "ToggleConfig")
 	
+	self:RegisterChatCommand('egrid', 'Grid')
 	self:RegisterChatCommand("moveui", "MoveUI")
 	self:RegisterChatCommand("resetui", "ResetUI")
 	self:RegisterChatCommand("enable", "EnableAddon")
@@ -87,7 +93,6 @@ function E:LoadCommands()
 	self:RegisterChatCommand('elvsays', 'ElvSays')
 	self:RegisterChatCommand('elvsayschannel', 'ElvSaysChannel')
 	self:RegisterChatCommand('elvsaystarget', 'ElvSaysTarget')
-	self:RegisterChatCommand('egrid', 'EGrid')
 	if E.ActionBars then
 		self:RegisterChatCommand('kb', E.ActionBars.ActivateBindMode)
 	end

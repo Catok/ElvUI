@@ -155,6 +155,14 @@ E.Options.args.general = {
 						E:GetModule('Maps'):Minimap_UpdateSettings()
 					end,
 				},
+				profileBinds = {
+					order = 12,
+					name = L['Profile Binds'],
+					desc = L['Save your keybinds with your ElvUI profile. That way if you have the dual spec feature enabled in ElvUI you can swap keybinds with your specs.'],
+					type = 'toggle',
+					get = function(info) return E.global.general.profileBinds end,		
+					set = function(info, value) E.global.general.profileBinds = value; StaticPopup_Show("GLOBAL_RL") end
+				},
 				panelWidth = {
 					order = 100,
 					type = 'range',
