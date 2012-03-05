@@ -10,4 +10,5 @@
 	<Script file="oUF_Swing\oUF_Swing.lua"/>
 	<Script file="oUF_DruidMana\oUF_DruidMana.lua"/>
 	<Script file="oUF_CombatFader\oUF_CombatFader.lua"/>
+	<Script file="oUF_Talents\oUF_Talents.lua"/>
 </Ui>

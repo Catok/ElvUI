@@ -145,7 +145,21 @@ E.Options.args.skins = {
 					order = 1,				
 				},			
 			},
-		},		
+		},
+		clique = {
+            order = 11,
+            type = 'group',
+            name = 'Clique',
+            get = function(info) return E.global.skins.clique[ info[#info] ] end,
+            set = function(info, value) E.global.skins.clique[ info[#info] ] = value; StaticPopup_Show("CONFIG_RL") end,
+            args = {
+                enable = {
+                    name = L['Enable'],
+                    type = 'toggle',
+                    order = 1,
+                },
+            },
+        },    
 		blizzard = {
 			order = 300,
 			type = 'group',
