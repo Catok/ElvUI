@@ -22,7 +22,7 @@ function UF:Construct_BossFrames(frame)
 	
 	frame.AltPowerBar = self:Construct_AltPowerBar(frame)
 	
-	frame:SetAttribute("type2", "focus")
+	frame:SetAttribute("type3", "focus")
 end
 
 function UF:Update_BossFrames(frame, db)

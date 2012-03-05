@@ -22,7 +22,7 @@ function UF:Construct_ArenaFrames(frame)
 	
 	frame.Trinket = self:Construct_Trinket(frame)
 	
-	frame:SetAttribute("type2", "focus")
+	frame:SetAttribute("type3", "focus")
 	
 	frame.Talents = self:Construct_Talents(frame)
 end
@@ -330,17 +330,7 @@ function UF:Update_ArenaFrames(frame, db)
 	--[[frame:Show()
 	frame.Hide = frame.Show
 	frame.unit = 'player'
-	frame:UpdateAllElements()
-	
-	local castbar = ElvUF_Arena1.Castbar
-	castbar.oldHide = castbar.Hide
-	castbar.Hide = castbar.Show
-	castbar:Show() ]]
-	
-	--local castbar2 = ElvUF_Arena2.Castbar
-	--castbar2.oldHide = castbar2.Hide
-	--castbar2.Hide = castbar2.Show
-	--castbar2:Show()
+	frame:UpdateAllElements()]]
 end
 
 UF['unitgroupstoload']['arena'] = 5
