@@ -48,8 +48,12 @@ local function OnEvent(self, event, ...)
 	ElvData['gold'][E.myrealm][E.myname] = NewMoney
 end
 
-local function Click()
-	ToggleAllBags()
+local function Click(self, button)
+	if button == "LeftButton" then
+		ToggleAllBags()
+	elseif button == "RightButton" then
+		ToggleCharacter("TokenFrame")
+	end
 end
 
 local function OnEnter(self)
