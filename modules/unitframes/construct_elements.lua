@@ -424,6 +424,17 @@ function UF:Construct_NameText(frame)
 	return name
 end
 
+function UF:Construct_ArenaTargetNameText(frame)
+	local name = frame:CreateFontString(nil, 'OVERLAY')
+	UF['fontstrings'][name] = true
+
+	frame:Tag(name, '[Elv:arenatargetclasscolor][Elv:namearenatarget]')
+
+	name:SetPoint('TOPLEFT', frame.Health, 0, 8)
+	
+	return name
+end
+
 function UF:Construct_Combobar(frame)
 	local CPoints = CreateFrame("Frame", nil, frame)
 	CPoints:CreateBackdrop('Default')
@@ -587,7 +598,7 @@ function UF:Construct_Talents(frame)
 	local Talents = frame:CreateFontString(nil, 'OVERLAY')
 	Talents:SetTextColor(1,1,1,.7)
 	Talents:FontTemplate(nil, 12, 'OUTLINE')
-	Talents:SetPoint('TOPRIGHT', frame.Health, 0, 10)
+	Talents:SetPoint('TOPRIGHT', frame.Health, 0, 8)
 	
 	return Talents
 end

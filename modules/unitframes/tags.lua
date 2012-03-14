@@ -123,6 +123,22 @@ ElvUF.Tags.Methods['Elv:getnamecolor'] = function(unit)
 	end
 end
 
+ElvUF.Tags.Events['Elv:arenatargetclasscolor'] = 'UNIT_POWER'
+ElvUF.Tags.Methods['Elv:arenatargetclasscolor'] = function(unit)
+	if not unit then return end
+	
+	local reaction = UnitReaction(unit.."target", 'player')
+	if (UnitIsPlayer(unit.."target")) then
+		return _TAGS['raidcolor'](unit.."target")
+	elseif (reaction) then
+		local c = ElvUF['colors'].reaction[reaction]
+		return string.format('|cff%02x%02x%02x', c[1] * 255, c[2] * 255, c[3] * 255)
+	else
+		return string.format('|cff%02x%02x%02x', 214, 191, 166)	
+	end
+
+end
+
 ElvUF.Tags.Events['Elv:nameshort'] = 'UNIT_NAME_UPDATE'
 ElvUF.Tags.Methods['Elv:nameshort'] = function(unit)
 	if not unit then return end
@@ -142,6 +158,14 @@ ElvUF.Tags.Events['Elv:namelong'] = 'UNIT_NAME_UPDATE'
 ElvUF.Tags.Methods['Elv:namelong'] = function(unit)
 	if not unit then return end
 	local name = UnitName(unit)
+	local colorblind = GetCVarBool("colorblindMode")
+	return utf8sub(name, 20, false)
+end
+
+ElvUF.Tags.Events['Elv:namearenatarget'] = 'UNIT_NAME_UPDATE'
+ElvUF.Tags.Methods['Elv:namearenatarget'] = function(unit)
+	if not unit then return end
+	local name = UnitName(unit.."target")
 	local colorblind = GetCVarBool("colorblindMode")
 	return utf8sub(name, 20, false)
 end

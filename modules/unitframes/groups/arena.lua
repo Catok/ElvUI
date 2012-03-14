@@ -14,6 +14,8 @@ function UF:Construct_ArenaFrames(frame)
 	
 	frame.Name = self:Construct_NameText(frame)
 	
+	frame.TargetName = self:Construct_ArenaTargetNameText(frame)
+	
 	frame.Buffs = self:Construct_Buffs(frame)
 	
 	frame.Debuffs = self:Construct_Debuffs(frame)
