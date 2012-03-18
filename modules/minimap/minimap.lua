@@ -196,9 +196,7 @@ function M:UpdateSettings()
 	end
 end
 
-function M:SkinMinimapButton(f)
-	if f:GetName() == "MiniMapBattlefieldFrame" or f:GetName() == "ElvConfigToggle" or f:GetName() == 'UpperRepExpBarHolder' then return end
-	
+function M:SkinMinimapButton(f)	
 	f:SetPushedTexture(nil)
 	f:SetHighlightTexture(nil)
 	f:SetDisabledTexture(nil)
@@ -226,10 +224,23 @@ function M:SkinMinimapButton(f)
 	f.skinned = true
 end
 
+function M:IsMinimapButton(f)
+	for i=1, f:GetNumRegions() do
+		local region = select(i, f:GetRegions())
+		if region:GetObjectType() == 'Texture' then
+			local tex = region:GetTexture()
+			if tex and tex:find('TrackingBorder') then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 function M:CheckForNewMinimapButtons()
 	for i = 1, Minimap:GetNumChildren() do
 		local f = select(i, Minimap:GetChildren())
-		if not f.skinned and f:GetObjectType() == 'Button' then
+		if not f.skinned and f:GetObjectType() == 'Button' and self:IsMinimapButton(f) then
 			self:SkinMinimapButton(f)
 		end
 	end
@@ -248,6 +259,13 @@ function M:Initialize()
 	Minimap:Point("TOPLEFT", mmholder, "TOPLEFT", 2, -2)
 	Minimap:SetMaskTexture('Interface\\ChatFrame\\ChatFrameBackground')
 	Minimap:CreateBackdrop('Default')
+	Minimap:HookScript('OnEnter', function(self)
+		self.location:Show()
+	end)
+	
+	Minimap:HookScript('OnLeave', function(self)
+		self.location:Hide()
+	end)	
 	
 	--Fix spellbook taint
 	ShowUIPanel(SpellBookFrame)
@@ -257,7 +275,8 @@ function M:Initialize()
 	Minimap.location:FontTemplate(nil, nil, 'OUTLINE')
 	Minimap.location:Point('TOP', Minimap, 'TOP', 0, -2)
 	Minimap.location:SetJustifyH("CENTER")
-	Minimap.location:SetJustifyV("MIDDLE")			
+	Minimap.location:SetJustifyV("MIDDLE")		
+	Minimap.location:Hide()
 	
 	if not E:IsPTRVersion() then
 		LFDSearchStatus:SetTemplate("Default")
