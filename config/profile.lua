@@ -43,6 +43,15 @@ P['bags'] = {
     ['sortOrientation'] = 'BOTTOM-TOP',
 	['xOffset'] = 0,
 	['yOffset'] = 0,
+	
+	['bagBar'] = {
+		['growthDirection'] = 'VERTICAL',
+		['sortDirection'] = 'ASCENDING',
+		['size'] = 30,
+		['spacing'] = 4,
+		['showBackdrop'] = false,
+		['mouseover'] = false,
+	},
 };
 
 --NamePlate
@@ -83,6 +92,7 @@ P['chat'] = {
 	['scrollDownInterval'] = 15,
 	['font'] = 'ElvUI Font',
 	['fontoutline'] = 'NONE',
+	['sticky'] = true,
 }
 
 --ClassTimers

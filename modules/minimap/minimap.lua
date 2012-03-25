@@ -47,10 +47,10 @@ local menuList = {
 	end},
 	{text = LFG_TITLE,
 	func = function() ToggleFrame(LFDParentFrame) end},
-	{text = E:IsPTRVersion() and RAID_FINDER or LOOKING_FOR_RAID,
-	func = function() if E:IsPTRVersion() then RaidMicroButton:Click() else ToggleFrame(LFRParentFrame) end end},
+	{text = RAID_FINDER,
+	func = function() RaidMicroButton:Click() end},
 	{text = ENCOUNTER_JOURNAL, 
-	func = function() if not IsAddOnLoaded('Blizzard_EncounterJournal') and E:IsPTRVersion() then LoadAddOn('Blizzard_EncounterJournal'); end ToggleFrame(EncounterJournal) end},	
+	func = function() if not IsAddOnLoaded('Blizzard_EncounterJournal') then LoadAddOn('Blizzard_EncounterJournal'); end ToggleFrame(EncounterJournal) end},	
 	{text = L_CALENDAR,
 	func = function()
 	if(not CalendarFrame) then LoadAddOn("Blizzard_Calendar") end
@@ -196,71 +196,7 @@ function M:UpdateSettings()
 	end
 end
 
-function M:SkinMinimapButton(f)	
-	f:SetPushedTexture(nil)
-	f:SetHighlightTexture(nil)
-	f:SetDisabledTexture(nil)
-	f:SetSize(22, 22)
-
-	for i = 1, f:GetNumRegions() do
-		local region = select(i, f:GetRegions())
-		if region:GetObjectType() == "Texture" then
-			local tex = region:GetTexture()
-			if tex and (tex:find("Border") or tex:find("Background")) then
-				region:SetTexture(nil)
-			else
-				region:SetDrawLayer("OVERLAY", 5)
-				region:ClearAllPoints()
-				region:Point("TOPLEFT", f, "TOPLEFT", 2, -2)
-				region:Point("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
-				region:SetTexCoord(.08, .92, .08, .92)
-			end
-		end
-	end
-
-	f:SetTemplate("Default")
-	f:SetFrameLevel(f:GetFrameLevel() + 2)
-	-- Set flag to indicate that this button has already been skinned
-	f.skinned = true
-end
-
-local blackList = {
-	['MiniMapBattlefieldFrame'] = true,
-}
-
-function M:IsMinimapButton(f)
-	if f:GetName() and blackList[f:GetName()] then
-		return false;
-	end
-	
-	for i=1, f:GetNumRegions() do
-		local region = select(i, f:GetRegions())
-		if region:GetObjectType() == 'Texture' then
-			local tex = region:GetTexture()
-			if tex then
-				tex = string.lower(tex)
-				if tex:find('trackingborder') or tex:find('minimap') then
-					return true
-				end
-			end
-		end
-	end
-	return false
-end
-
-function M:CheckForNewMinimapButtons()
-	for i = 1, Minimap:GetNumChildren() do
-		local f = select(i, Minimap:GetChildren())
-		if not f.skinned and f:GetObjectType() == 'Button' and self:IsMinimapButton(f) then
-			self:SkinMinimapButton(f)
-		end
-	end
-end
-
 function M:Initialize()	
-	self:ScheduleRepeatingTimer('CheckForNewMinimapButtons', 15)
-	self:CheckForNewMinimapButtons() --Initial check
-	
 	local mmholder = CreateFrame('Frame', 'MMHolder', Minimap)
 	mmholder:Point("TOPRIGHT", E.UIParent, "TOPRIGHT", -3, -3)
 	mmholder:Width((Minimap:GetWidth() + 29) + E.RBRWidth)
@@ -289,15 +225,9 @@ function M:Initialize()
 	Minimap.location:SetJustifyV("MIDDLE")		
 	Minimap.location:Hide()
 	
-	if not E:IsPTRVersion() then
-		LFDSearchStatus:SetTemplate("Default")
-		LFDSearchStatus:SetClampedToScreen(true)
-		LFDDungeonReadyStatus:SetClampedToScreen(true)
-	else
-		LFGSearchStatus:SetTemplate("Default")
-		LFGSearchStatus:SetClampedToScreen(true)
-		LFGDungeonReadyStatus:SetClampedToScreen(true)	
-	end 
+	LFGSearchStatus:SetTemplate("Default")
+	LFGSearchStatus:SetClampedToScreen(true)
+	LFGDungeonReadyStatus:SetClampedToScreen(true)	
 	
 	MinimapBorder:Hide()
 	MinimapBorderTop:Hide()
@@ -351,13 +281,9 @@ function M:Initialize()
 	Minimap:SetScript("OnMouseWheel", M.Minimap_OnMouseWheel)	
 	Minimap:SetScript("OnMouseUp", M.Minimap_OnMouseUp)
 	
-	if not E:IsPTRVersion() then
-		self:SecureHook("MiniMapLFG_UpdateIsShown", "UpdateLFG")
-	else
-		MiniMapLFGFrame:ClearAllPoints()
-		MiniMapLFGFrame:Point("BOTTOMRIGHT", Minimap, "BOTTOMRIGHT", 2, 1)
-		MiniMapLFGFrameBorder:Hide()		
-	end
+	MiniMapLFGFrame:ClearAllPoints()
+	MiniMapLFGFrame:Point("BOTTOMRIGHT", Minimap, "BOTTOMRIGHT", 2, 1)
+	MiniMapLFGFrameBorder:Hide()	
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "Update_ZoneText")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "Update_ZoneText")
 	self:RegisterEvent("ZONE_CHANGED", "Update_ZoneText")

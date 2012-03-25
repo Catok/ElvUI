@@ -28,7 +28,8 @@ local function ResetAndClear(self)
 end
 
 --This one isn't for the actual bag buttons its for the buttons you can use to swap bags.
-function B:BagFrameSlotNew(frame, slot)
+function B:BagFrameSlotNew(frame, slot, nonAllInOne)
+	if not frame.buttons then frame.buttons = {}; end
 	for _, v in ipairs(frame.buttons) do
 		if v.slot == slot then
 			return v, false
@@ -52,27 +53,29 @@ function B:BagFrameSlotNew(frame, slot)
 		ret.slot = slot
 		table.insert(frame.buttons, ret)
 	end
-
-	ret.frame:HookScript("OnEnter", function()
-		local bag
-		for ind, val in ipairs(B.buttons) do
-			if val.bagOwner == ret.slot then
-				val.frame:SetAlpha(1)
-				--E:Print('Matched Bag Slot: '..val.bagOwner..' to button: '..ind)
-			else
-				val.frame:SetAlpha(0.2)
+	
+	if not nonAllInOne then
+		ret.frame:HookScript("OnEnter", function()
+			local bag
+			for ind, val in ipairs(B.buttons) do
+				if val.bagOwner == ret.slot then
+					val.frame:SetAlpha(1)
+					--E:Print('Matched Bag Slot: '..val.bagOwner..' to button: '..ind)
+				else
+					val.frame:SetAlpha(0.2)
+				end
 			end
-		end
-	end)
+		end)
 
-	ret.frame:HookScript("OnLeave", function()
-		for _, btn in ipairs(self.buttons) do
-			btn.frame:SetAlpha(1)
-		end
-	end)
+		ret.frame:HookScript("OnLeave", function()
+			for _, btn in ipairs(self.buttons) do
+				btn.frame:SetAlpha(1)
+			end
+		end)
 
-	ret.frame:SetScript('OnClick', nil)
-
+		ret.frame:SetScript('OnClick', nil)
+	end
+	
 	ret.frame:SetTemplate('Default', true)
 	ret.frame:StyleButton()
 	ret.frame:SetFrameLevel(ret.frame:GetFrameLevel() + 1)
@@ -299,6 +302,7 @@ function B:Layout(isBank)
 			b.frame:ClearAllPoints()
 			b.frame:Point("LEFT", f.ContainerHolder, "LEFT", xOff, 0)
 			b.frame:Size(bSize)
+			b.frame:FixDimensions()
 
 			if isBank then
 				BankFrameItemButton_Update(b.frame)
@@ -371,6 +375,7 @@ function B:Layout(isBank)
 				b.frame:ClearAllPoints()
 				b.frame:Point("TOPLEFT", f.HolderFrame, "TOPLEFT", xOff, yOff)
 				b.frame:Size(bSize)
+				b.frame:FixDimensions()
 				b.frame.lock = false
 				b.frame:SetAlpha(1)
 				
@@ -1442,9 +1447,12 @@ function B:PLAYERBANKBAGSLOTS_CHANGED()
 end
 
 function B:Initialize()
-	if not E.global.bags.enable then return end
+	if not E.global.bags.enable then 
+		self:LoadBagBar()
+		return 
+	end
 	self:InitBags()
-
+	E.bags = self
 	--Register Events
 	self:RegisterEvent("BAG_UPDATE")
 	self:RegisterEvent("ITEM_LOCK_CHANGED")
