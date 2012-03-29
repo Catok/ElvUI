@@ -1,5 +1,6 @@
 local E, L, P, G = unpack(select(2, ...));
-local R = E:NewModule('Reminder')
+local R = E:NewModule('Reminder', 'AceTimer-3.0');
+local LSM = LibStub("LibSharedMedia-3.0");
 R.CreatedReminders = {};
 
 function R:PlayerHasFilteredBuff(db, checkPersonal)
@@ -23,13 +24,15 @@ function R:PlayerHasFilteredBuff(db, checkPersonal)
 end
 
 function R:UpdateReminderIcon(event, unit)
+	if (event == 'UNIT_AURA' and unit ~= "player") then return; end
+	
 	local db = E.global.reminder.filters[E.myclass][self.groupName];
+
 	self:Hide();
 	self.icon:SetTexture(nil);
 	
-	
-	if not db or not db.enable or (not db.spellGroup and not db.weaponCheck) or (event == 'UNIT_AURA' and unit ~= "player") then return; end
-		
+	if not db or not db.enable or (not db.spellGroup and not db.weaponCheck) then return; end
+
 	--Level Check
 	if db.level and UnitLevel('player') < db.level then return; end
 	
@@ -124,7 +127,7 @@ function R:UpdateReminderIcon(event, unit)
 	end
 	
 	if db.combat then
-		if db.combat == InCombatLockdown() then
+		if InCombatLockdown() then
 			combatCheck = true;
 		else
 			combatCheck = nil;
@@ -133,26 +136,26 @@ function R:UpdateReminderIcon(event, unit)
 		combatCheck = true;
 	end
 	
-	if db.instance == (instanceType == "party" or instanceType == "raid") then
+	if db.instance and (instanceType == "party" or instanceType == "raid") then
 		instanceCheck = true;
 	else
 		instanceCheck = nil;
 	end
 
-	if db.pvp == (instanceType == "arena" or instanceType == "pvp") then
+	if db.pvp and (instanceType == "arena" or instanceType == "pvp") then
 		PVPCheck = true;
 	else
 		PVPCheck = nil;
 	end
 	
-	if db.pvp == nil and db.instance == nil then
+	if not db.pvp and not db.instance then
 		PVPCheck = true;
 		instanceCheck = true;
 	end
 	
 	if db.reverseCheck and not (db.role or db.tree) then db.reverseCheck = nil; end
 	if not self.icon:GetTexture() or UnitInVehicle("player") then return; end
-
+	
 	if db.spellGroup then
 		if roleCheck and treeCheck and combatCheck and (instanceCheck or PVPCheck) and not R:PlayerHasFilteredBuff(db.spellGroup, db.personal) then
 			self:Show();
@@ -174,6 +177,19 @@ function R:UpdateReminderIcon(event, unit)
 			end
 		end
 	end
+	
+	if self:IsShown() then
+		if not R.SoundThrottled then
+			R.SoundThrottled = true;
+			PlaySoundFile(LSM:Fetch("sound", E.global['reminder'].sound));
+			R:ScheduleTimer('ThrottleSound', 10);
+		end
+	end
+end
+
+function R:ThrottleSound()
+	self.SoundThrottled = nil;
+	self:CancelAllTimers();
 end
 
 function R:CreateReminder(name, index)
