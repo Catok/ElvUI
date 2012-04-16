@@ -331,8 +331,8 @@ function UF:Update_ArenaFrames(frame, db)
 	
 	--[[frame:Show()
 	frame.Hide = frame.Show
-	frame.unit = 'player'
-	frame:UpdateAllElements()]]
+	frame.unit = 'player']]
+	frame:UpdateAllElements()
 end
 
 UF['unitgroupstoload']['arena'] = 5

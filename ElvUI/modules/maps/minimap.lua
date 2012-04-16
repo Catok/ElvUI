@@ -50,7 +50,7 @@ local menuList = {
 	{text = RAID_FINDER,
 	func = function() RaidMicroButton:Click() end},
 	{text = ENCOUNTER_JOURNAL, 
-	func = function() if not IsAddOnLoaded('Blizzard_EncounterJournal') then LoadAddOn('Blizzard_EncounterJournal'); end ToggleFrame(EncounterJournal) end},
+	func = function() if not IsAddOnLoaded('Blizzard_EncounterJournal') then LoadAddOn('Blizzard_EncounterJournal'); end ToggleFrame(EncounterJournal) end},	
 	{text = L_CALENDAR,
 	func = function()
 	if(not CalendarFrame) then LoadAddOn("Blizzard_Calendar") end
@@ -360,8 +360,7 @@ function M:Initialize()
 	
 	MiniMapLFGFrame:ClearAllPoints()
 	MiniMapLFGFrame:Point("BOTTOMRIGHT", Minimap, "BOTTOMRIGHT", 2, 1)
-	MiniMapLFGFrameBorder:Hide()		
-	
+	MiniMapLFGFrameBorder:Hide()	
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "Update_ZoneText")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "Update_ZoneText")
 	self:RegisterEvent("ZONE_CHANGED", "Update_ZoneText")

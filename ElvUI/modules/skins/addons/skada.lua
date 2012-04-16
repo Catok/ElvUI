@@ -72,7 +72,6 @@ local function LoadSkin()
 	for _, window in ipairs(Skada:GetWindows()) do
 		window:UpdateDisplay()
 	end	
-
 end
 
 S:RegisterSkin('Skada', LoadSkin)

@@ -821,7 +821,7 @@ P['unitframe'] = {
 				['anchorPoint'] = 'RIGHT',					
 				['fontsize'] = 10,
 				['showPlayerOnly'] = false,
-				['useFilter'] = '',	
+				['useFilter'] = 'DebuffBlacklist',	
 				['durationLimit'] = 0,
 			},	
 			['buffIndicator'] = {

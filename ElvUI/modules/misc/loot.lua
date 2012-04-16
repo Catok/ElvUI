@@ -85,7 +85,6 @@ local function createSlot(id)
 	iconFrame:Height(iconsize)
 	iconFrame:Width(iconsize)
 	iconFrame:SetPoint("RIGHT", frame)
-	
 	iconFrame:SetTemplate("Default")
 	E["frames"][iconFrame] = nil;
 
@@ -255,6 +254,7 @@ function M:LoadLoot()
 	lootFrameHolder:Height(22)
 	
 	lootFrame = CreateFrame('Button', 'ElvLootFrame', lootFrameHolder)
+	lootFrame:SetClampedToScreen(true)
 	lootFrame:SetPoint('TOPLEFT')
 	lootFrame:Size(256, 64)
 	lootFrame:SetTemplate('Default')
