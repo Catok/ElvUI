@@ -113,7 +113,7 @@ local buffs = { -- credits Proditor, Rinu
 }
 
 local function Update(object, event, unit)
-  --if object.unit ~= unit or unit == "player" or unit:find("pet") then return end
+  if object.unit ~= unit or unit == "player" or unit:find("pet") then return end
   object.Talents:SetText("")
   for index=1, 40 do
      local name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable = UnitAura(unit, index, "HELPFUL")

@@ -137,6 +137,11 @@ P['datatexts'] = {
 		},
 		['LeftMiniPanel'] = 'Guild',
 		['RightMiniPanel'] = 'Friends',
+		['Extra_Panel_1'] = {
+			['left'] = '',
+			['middle'] = '',	
+			['right'] = '',
+		},
 	},
 	['localtime'] = true,
 	['time24'] = false,

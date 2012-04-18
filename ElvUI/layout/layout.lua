@@ -9,6 +9,7 @@ E.Layout = LO;
 function LO:Initialize()
 	self:CreateChatPanels()
 	self:CreateMinimapPanels()
+	self:CreateExtraPanels()
 end
 
 
@@ -60,6 +61,8 @@ local function ChatButton_OnClick(self, btn)
 		elseif IsAddOnLoaded('Skada') and E.db.skins.embedRight == 'Skada' then
 			Skada:ToggleWindow()
 		end
+	elseif btn == 'MiddleButton' then
+		ToggleExtra()
 	else
 		if E.db[self.parent:GetName()..'Faded'] then
 			E.db[self.parent:GetName()..'Faded'] = nil
@@ -266,6 +269,25 @@ function LO:CreateMinimapPanels()
 	configtoggle.text:SetPoint('CENTER')
 	configtoggle.text:SetJustifyH('CENTER')
 	configtoggle:SetScript('OnClick', function() E:ToggleConfig() end)
+end
+
+function LO:CreateExtraPanels()
+	local extrapanel1 = CreateFrame('Frame', 'Extra_Panel_1', E.UIParent)
+	extrapanel1:SetTemplate('Default', true)
+	extrapanel1:SetFrameStrata('MEDIUM')
+	extrapanel1:Point("BOTTOM", RightChatPanel, "TOP", 0, 1); 
+	extrapanel1:Size(E.db.general.panelWidth, PANEL_HEIGHT);
+	E:GetModule('DataTexts'):RegisterPanel(Extra_Panel_1, 3, 'ANCHOR_BOTTOM', 0, -4)
+	extrapanel1:Hide()
+
+end
+
+function ToggleExtra()
+		if Extra_Panel_1:IsShown() then
+			Extra_Panel_1:Hide()
+		else
+			Extra_Panel_1:Show()
+		end
 end
 
 E:RegisterModule(LO:GetName())
