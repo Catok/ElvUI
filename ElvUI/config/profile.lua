@@ -803,6 +803,7 @@ P['unitframe'] = {
 			['name'] = {
 				['enable'] = true,
 				['position'] = 'LEFT',
+				['length'] = 'LONG',
 			},
 			['buffs'] = {
 				['enable'] = false,
@@ -899,6 +900,7 @@ P['unitframe'] = {
 			['name'] = {
 				['enable'] = true,
 				['position'] = 'TOP',
+				['length'] = 'SHORT',
 			},
 			['buffs'] = {
 				['enable'] = false,
@@ -982,6 +984,7 @@ P['unitframe'] = {
 			['name'] = {
 				['enable'] = true,
 				['position'] = 'TOP',
+				['length'] = 'SHORT',
 			},
 			['buffs'] = {
 				['enable'] = false,
