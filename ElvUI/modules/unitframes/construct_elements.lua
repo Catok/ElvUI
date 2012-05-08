@@ -512,9 +512,9 @@ function UF:Construct_DebuffHighlight(frame)
 	dbh:Point('BOTTOMRIGHT', frame.Health.backdrop, 'BOTTOMRIGHT', -2, 2)
 	dbh:SetTexture(E['media'].blankTex)
 	dbh:SetVertexColor(0, 0, 0, 0)
-	dbh:SetBlendMode("ADD")
+	dbh:SetBlendMode("BLEND")
 	frame.DebuffHighlightFilter = true
-	frame.DebuffHighlightAlpha = 0.45
+	frame.DebuffHighlightAlpha = 1
 	
 	if frame.Health then
 		dbh:SetParent(frame.Health)
