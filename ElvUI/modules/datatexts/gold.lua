@@ -33,16 +33,16 @@ local function OnEvent(self, event, ...)
 	if (ElvData['gold'] == nil) then ElvData['gold'] = {}; end
 	if (ElvData['gold'][E.myrealm] == nil) then ElvData['gold'][E.myrealm] = {} end
 	if (ElvData['gold'][E.myrealm][E.myname] == nil) then ElvData['gold'][E.myrealm][E.myname] = NewMoney end
-	
+
 	local OldMoney = ElvData['gold'][E.myrealm][E.myname] or NewMoney
-	
+
 	local Change = NewMoney-OldMoney -- Positive if we gain money
 	if OldMoney>NewMoney then		-- Lost Money
 		Spent = Spent - Change
 	else							-- Gained Moeny
 		Profit = Profit + Change
 	end
-	
+
 	self.text:SetText(formatMoney(NewMoney))
 
 	ElvData['gold'][E.myrealm][E.myname] = NewMoney
@@ -66,19 +66,19 @@ local function OnEnter(self)
 		GameTooltip:AddDoubleLine(L["Deficit:"], formatMoney(Profit-Spent), 1, 0, 0, 1, 1, 1)
 	elseif (Profit-Spent)>0 then
 		GameTooltip:AddDoubleLine(L["Profit:"	], formatMoney(Profit-Spent), 0, 1, 0, 1, 1, 1)
-	end				
-	GameTooltip:AddLine' '								
+	end
+	GameTooltip:AddLine' '
 
-	local totalGold = 0				
-	GameTooltip:AddLine(L["Character: "])			
+	local totalGold = 0
+	GameTooltip:AddLine(L["Character: "])
 
 	for k,_ in pairs(ElvData['gold'][E.myrealm]) do
-		if ElvData['gold'][E.myrealm][k] then 
+		if ElvData['gold'][E.myrealm][k] then
 			GameTooltip:AddDoubleLine(k, FormatTooltipMoney(ElvData['gold'][E.myrealm][k]), 1, 1, 1, 1, 1, 1)
 			totalGold=totalGold+ElvData['gold'][E.myrealm][k]
 		end
 	end
-	
+
 	GameTooltip:AddLine' '
 	GameTooltip:AddLine(L["Server: "])
 	GameTooltip:AddDoubleLine(L["Total: "], FormatTooltipMoney(totalGold), 1, 1, 1, 1, 1, 1)
@@ -90,16 +90,16 @@ local function OnEnter(self)
 			GameTooltip:AddLine(CURRENCY)
 		end
 		if name and count then GameTooltip:AddDoubleLine(name, count, 1, 1, 1) end
-	end	
-	
+	end
+
 	GameTooltip:Show()
 end
 
 --[[
 	DT:RegisterDatatext(name, events, eventFunc, updateFunc, clickFunc, onEnterFunc, onLeaveFunc)
-	
+
 	name - name of the datatext (required)
-	events - must be a table with string values of event names to register 
+	events - must be a table with string values of event names to register
 	eventFunc - function that gets fired when an event gets triggered
 	updateFunc - onUpdate script target function
 	click - function to fire when clicking the datatext
@@ -107,4 +107,3 @@ end
 	onLeaveFunc - function to fire OnLeave, if not provided one will be set for you that hides the tooltip.
 ]]
 DT:RegisterDatatext('Gold', {'PLAYER_ENTERING_WORLD', 'PLAYER_MONEY', 'SEND_MAIL_MONEY_CHANGED', 'SEND_MAIL_COD_CHANGED', 'PLAYER_TRADE_MONEY', 'TRADE_MONEY_CHANGED'}, OnEvent, nil, Click, OnEnter)
-
