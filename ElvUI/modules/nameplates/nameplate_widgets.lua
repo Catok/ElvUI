@@ -358,7 +358,7 @@ function NP:SetAuraInstance(guid, spellid, expiration, stacks, caster, duration,
 	end
 	
 	local spellList = E.global['nameplate']['spellList']
-	if spellList[name] then
+	if spellList[name] and spellList[name].enable then
 		visibility = spellList[name]['visibility']
 		if visibility  == 1 or (visibility == 3 and caster == UnitGUID('player')) then
 			filter = true;

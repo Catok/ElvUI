@@ -36,6 +36,7 @@ P['general'] = {
 	['mapTransparency'] = 1,
 	['minimapSize'] = 176,
 	['raidReminder'] = true,
+	['minimapPanels'] = true,
 	['tinyWorldMap'] = true,
 };
 
@@ -675,6 +676,7 @@ P['unitframe'] = {
 				['showPlayerOnly'] = false,
 				['useFilter'] = '',		
 				['durationLimit'] = 0,
+				['overrideSize'] = 45,
 			},
 			['debuffs'] = {
 				['enable'] = true,
@@ -689,6 +691,7 @@ P['unitframe'] = {
 				['showPlayerOnly'] = true,
 				['useFilter'] = '',	
 				['durationLimit'] = 0,
+				['sizeOverride'] = 44,
 			},	
 			['castbar'] = {
 				['enable'] = true,
@@ -739,6 +742,7 @@ P['unitframe'] = {
 				['showPlayerOnly'] = false,
 				['useFilter'] = 'TurtleBuffs',		
 				['durationLimit'] = 0,
+				['overrideSize'] = 45,
 			},
 			['debuffs'] = {
 				['enable'] = true,
@@ -753,6 +757,7 @@ P['unitframe'] = {
 				['showPlayerOnly'] = false,
 				['useFilter'] = 'CCDebuffs',	
 				['durationLimit'] = 0,
+				['sizeOverride'] = 44,
 			},	
 			['castbar'] = {
 				['enable'] = true,
@@ -774,7 +779,7 @@ P['unitframe'] = {
 			['columnSpacing'] = 3,
 			['xOffset'] = 0,
 			['yOffset'] = -3,
-			['groupBy'] = 'ISTANK',
+			['groupBy'] = 'TANK',
 			["showParty"] = true,
 			["showRaid"] = true,
 			["showSolo"] = false,
@@ -832,6 +837,7 @@ P['unitframe'] = {
 				['showPlayerOnly'] = false,
 				['useFilter'] = 'DebuffBlacklist',	
 				['durationLimit'] = 0,
+				['sizeOverride'] = 44,
 			},	
 			['buffIndicator'] = {
 				['enable'] = true,
@@ -871,7 +877,7 @@ P['unitframe'] = {
 			['columnSpacing'] = 3,
 			['xOffset'] = 3,
 			['yOffset'] = -3,
-			['groupBy'] = 'ISTANK',
+			['groupBy'] = 'TANK',
 			["showParty"] = true,
 			["showRaid"] = true,
 			["showSolo"] = false,
