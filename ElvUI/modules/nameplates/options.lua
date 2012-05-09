@@ -3,6 +3,27 @@ local NP = E:GetModule('NamePlates')
 
 local selectedFilter
 local filters
+local selectedSpellName
+local spellLists
+local spellIDs = {}
+
+function deepcopy(object)
+	local lookup_table = {}
+	local function _copy(object)
+		if type(object) ~= "table" then
+			return object
+		elseif lookup_table[object] then
+			return lookup_table[object]
+		end
+		local new_table = {}
+		lookup_table[object] = new_table
+		for index, value in pairs(object) do
+			new_table[_copy(index)] = _copy(value)
+		end
+			return setmetatable(new_table, getmetatable(object))
+	end
+	return _copy(object)
+end
 
 local function UpdateFilterGroup()
 	if not selectedFilter or not E.global['nameplate']['filter'][selectedFilter] then
@@ -62,6 +83,116 @@ local function UpdateFilterGroup()
 				min = 0.67, max = 2, step = 0.01,
 				get = function(info) return E.global["nameplate"]['filter'][selectedFilter][ info[#info] ] end,
 				set = function(info, value) E.global["nameplate"]['filter'][selectedFilter][ info[#info] ] = value; UpdateFilterGroup() end,						
+			},
+		},	
+	}
+end
+
+local function UpdateSpellGroup()
+	if not selectedSpellName or not E.global['nameplate']['spellList'][selectedSpellName] then
+		E.Options.args.nameplate.args.auras.args.specificSpells.args.spellGroup = nil
+		return
+	end
+	
+	E.Options.args.nameplate.args.auras.args.specificSpells.args.spellGroup = {
+		type = 'group',
+		name = selectedSpellName,
+		guiInline = true,
+		order = -10,
+		get = function(info) return E.global["nameplate"]['spellList'][selectedSpellName][ info[#info] ] end,
+		set = function(info, value) E.global["nameplate"]['spellList'][selectedSpellName][ info[#info] ] = value; NP:UpdateAllPlates(); UpdateSpellGroup() end,		
+		args = {
+			visibility = {
+				type = 'select',
+				order = 1,
+				name = L['Visibility'],
+				desc = L['Set when this aura is visble.'],
+				values = {[1]="Always",[2]="Never",[3]="Only Mine"},
+				get = function(info)
+					return E.global['nameplate']['spellList'][selectedSpellName]["visibility"]
+				end,
+				set = function(info, value)
+					E.global['nameplate']['spellList'][selectedSpellName]["visibility"] = value
+				end,
+			},
+			width = {
+				type = 'range',
+				order = 2,
+				name = L['Icon Width'],
+				desc = L['Set the width of this spells icon.'],
+				min = 10,
+				max = 100,
+				step = 2,
+				get = function(info)
+					return E.global['nameplate']['spellList'][selectedSpellName]["width"]
+				end,
+				set = function(info, value)
+					E.global['nameplate']['spellList'][selectedSpellName]["width"] = value
+					if E.global['nameplate']['spellList'][selectedSpellName]["lockAspect"] then
+						E.global['nameplate']['spellList'][selectedSpellName]["height"] = value
+					end
+				end,
+			},
+			height = {
+				type = 'range',
+				order = 3,
+				name = L['Icon Height'],
+				desc = L['Set the height of this spells icon.'],
+				disabled = function() return E.global['nameplate']['spellList'][selectedSpellName]["lockAspect"] end,
+				min = 10,
+				max = 100,
+				step = 2,
+				get = function(info)
+					return E.global['nameplate']['spellList'][selectedSpellName]["height"]
+				end,
+				set = function(info, value)
+					E.global['nameplate']['spellList'][selectedSpellName]["height"] = value
+				end,
+			},
+			lockAspect = {
+				type = 'toggle',
+				order = 4,
+				name = L['Lock Aspect Ratio'],
+				desc = L['Set if height and width are locked to the same value.'],
+				get = function(info)
+					return E.global['nameplate']['spellList'][selectedSpellName]["lockAspect"]
+				end,
+				set = function(info, value)
+					E.global['nameplate']['spellList'][selectedSpellName]["lockAspect"] = value
+					if value then
+						E.global['nameplate']['spellList'][selectedSpellName]["height"] = E.global['nameplate']['spellList'][selectedSpellName]["width"]
+					end
+				end,
+			},
+			flashTime = {
+				type = 'range',
+				order = 5,
+				name = L['Flash Duration'],
+				desc = L['Set the time in seconds that the icon will begin flashing.'],
+				min = 0,
+				max = 10,
+				step = 1,
+				get = function(info)
+					return E.global['nameplate']['spellList'][selectedSpellName]["flashTime"]
+				end,
+				set = function(info, value)
+					E.global['nameplate']['spellList'][selectedSpellName]["flashTime"] = value
+				end,
+			},
+			text = {
+				type = 'range',
+				order = 7,
+				name = L['Text Size'],
+				desc = L['Size of the timer text.'],
+				min = 6,
+				max = 24,
+				step = 1,
+				get = function(info)
+					return E.global['nameplate']['spellList'][selectedSpellName]["text"]
+				end,
+				set = function(info, value)
+					E.global['nameplate']['spellList'][selectedSpellName]["text"] = value
+				end,
 			},
 		},	
 	}
@@ -142,36 +273,8 @@ E.Options.args.nameplate = {
 					desc = L['Display a healer icon over known healers inside battlegrounds.'],
 					set = function(info, value) E.db.nameplate[ info[#info] ] = value; NP:PLAYER_ENTERING_WORLD(); NP:UpdateAllPlates() end,
 				},
-				auras = {
-					order = 8,
-					type = "group",
-					name = L["Auras"],
-					guiInline = true,	
-					args = {
-						trackauras = {
-							type = "toggle",
-							order = 1,
-							name = L["Personal Debuffs"],
-							desc = L["Display your personal debuffs over the nameplate."],
-						},
-						trackfilter = {
-							type = "select",
-							order = 2,
-							name = L['Use Filter'],
-							desc = L['Select a filter to use. These are imported from the unitframe aura filter.'],
-							values = function()
-								filters = {}
-								filters[''] = ''
-								for filter in pairs(E.global['unitframe']['aurafilters']) do
-									filters[filter] = filter
-								end
-								return filters
-							end,
-						},						
-					},
-				},
 				reactions = {
-					order = 9,
+					order = 8,
 					type = "group",
 					name = L["Reactions"],
 					guiInline = true,
@@ -213,7 +316,7 @@ E.Options.args.nameplate = {
 					},		
 				},				
 				threat = {
-					order = 10,
+					order = 9,
 					type = "group",
 					name = L["Threat"],
 					guiInline = true,
@@ -310,9 +413,323 @@ E.Options.args.nameplate = {
 				},				
 			},
 		},
+		auras = {
+			order = 5,
+			type = "group",
+			name = L["Auras"],
+			disabled = function() return not E.NamePlates; end,
+			args = {
+				preciseTimer = {
+					type = "toggle",
+					order = 1,
+					name = L["Precise Timer"],
+					desc = L["Displays the time to one decimal point."],
+				},
+				colorByTime = {
+					type = "toggle",
+					order = 2,
+					name = L["Color Timer Text By Time"],
+					desc = L["Changes the color of the timer text by time remaining."],
+					get = function(info)
+						if E.db.nameplate['colorByTime'] == nil then
+							E.db.nameplate['colorByTime'] = true
+						end
+						return E.db.nameplate['colorByTime']
+					end,
+					set = function(info, value)
+						E.db.nameplate['colorByTime'] = value
+					end,
+				},
+				timerColor = {
+					type = "color",
+					order = 3,
+					name = L["Color of Timer Text"],
+					desc = L["Sets the color of the timer text when not using the color by time left option."],
+					disabled = function() return E.db.nameplate['colorByTime'] end,
+					get = function(info)
+						local color = E.db.nameplate['timerColor']
+						if not color then
+							color = {r = 1, g = 1, b = 1}
+							E.db.nameplate['timerColor'] = color
+						end
+						return color.r, color.g, color.b, 1
+					end,
+					set = function(info, r, g, b)
+						E.db.nameplate['timerColor'].r = r
+						E.db.nameplate['timerColor'].g = g
+						E.db.nameplate['timerColor'].b = b
+					end,
+				},
+				maxAuras = {
+					type = 'range',
+					order = 4,
+					name = L['Maximum Auras'],
+					desc = L['Set the maximum number of auras per nameplate.'],
+					min = 1,
+					max = 10,
+					step = 1,
+					get = function(info)
+						if E.db.nameplate['maxAuras'] == nil then
+							E.db.nameplate['maxAuras'] = 5
+						end
+						return E.db.nameplate['maxAuras']
+					end,
+					set = function(info, value)
+						E.db.nameplate['maxAuras'] = value
+						StaticPopup_Show("GLOBAL_RL")
+					end,
+				},
+				auraAnchor = {
+					type = 'select',
+					order = 5,
+					name = L['Anchor'],
+					desc = L['Set how icons are anchored to the nameplate.'],
+					values = {[0]="Left",[1]="Right",[2]="Center"},
+					get = function(info)
+						if E.db.nameplate['auraAnchor'] == nil then
+							E.db.nameplate['auraAnchor'] = 1
+						end
+						return E.db.nameplate['auraAnchor']
+					end,
+					set = function(info, value)
+						E.db.nameplate['auraAnchor'] = value
+						StaticPopup_Show("GLOBAL_RL")
+					end,
+				},
+				sortDirection = {
+					type = 'select',
+					order = 5,
+					name = L['Sorting'],
+					desc = L['Set how icons are sorted based on time left.'],
+					values = {[0]="Lowest",[1]="Highest"},
+					get = function(info)
+						if E.db.nameplate['sortDirection'] == nil then
+							E.db.nameplate['sortDirection'] = 1
+						end
+						return E.db.nameplate['sortDirection']
+					end,
+					set = function(info, value)
+						E.db.nameplate['sortDirection'] = value
+					end,
+				},
+				clearSpellList = {
+					order = 6,
+					type = 'execute',
+					name = L['Clear Spell List'],
+					desc = L['Empties the list of specific spells and their configurations'],
+					func = function()
+						E.global["nameplate"]["spellList"] = { }
+						UpdateSpellGroup()
+					end
+				},
+				resetSpellList = {
+					order = 7,
+					type = 'execute',
+					name = L['Restore Spell List'],
+					desc = L['Restores the default list of specific spells and their configurations'],
+					func = function()
+						E.global["nameplate"]["spellList"] = deepcopy(E.global["nameplate"]["spellListDefault"]["defaultSpellList"])
+						UpdateSpellGroup()
+					end
+				},
+				specificSpells = {
+					order = 1,
+					type = "group",
+					name = L["Specific Auras"],
+					args = {
+						addSpell = {
+							type = "input",
+							order = 1,
+							name = L["Spell Name"],
+							desc = L["Input a spell name or spell ID."],
+							get = function(info) return "" end,
+							set = function(info, value) 
+								local spellName = ""
+								
+								if not tonumber(value) then
+									value = tostring(value)
+								end
+								
+								if not tonumber(value) and strlower(value) == "school lockout" then
+									spellName = "School Lockout"
+								elseif not GetSpellInfo(value) then
+									if #(spellIDs) == 0 then
+										for i = 100000, 1,-1  do --Ugly but works
+											local name = GetSpellInfo(i)
+											if name and not spellIDs[name] then
+												spellIDs[name] = i
+											end
+										end
+									end
+									if spellIDs[value] then
+										spellName = value
+									end
+								else
+									spellName = GetSpellInfo(value)
+								end
+								
+								if spellName ~= "" then
+									if not E.global['nameplate']['spellList'][spellName] then
+										E.global['nameplate']['spellList'][spellName] = {
+											['visibility'] = E.global['nameplate']['spellListDefault']['visibility'],
+											['width'] = E.global['nameplate']['spellListDefault']['width'],
+											['height'] = E.global['nameplate']['spellListDefault']['height'],
+											['lockAspect'] = E.global['nameplate']['spellListDefault']['lockAspect'],
+											['text'] = E.global['nameplate']['spellListDefault']['text'],
+											['flashTime'] = E.global['nameplate']['spellListDefault']['flashTime'],
+										}
+									end
+									selectedSpellName = spellName
+									UpdateSpellGroup()
+								else
+									E:Print(L["Not valid spell name or spell ID"])
+								end
+							end,	
+						},
+						spellList = {
+							order = 2,
+							type = 'select',
+							name = L['Spell List'],
+							get = function(info) return selectedSpellName end,
+							set = function(info, value) selectedSpellName = value; UpdateSpellGroup() end,							
+							values = function()
+								spellLists = {}
+								for spell in pairs(E.global['nameplate']['spellList']) do
+									local color = "|cffff0000"
+									local visibility = E.global['nameplate']['spellList'][spell]['visibility']
+									if visibility == 1 then
+										color = "|cff00ff00"
+									elseif visibility == 3 then
+										color = "|cff00ffff"
+									end
+									spellLists[spell] = color..spell.."|r"
+								end
+								return spellLists
+							end,
+						},
+						removeSpell = {
+							order = 3,
+							type = 'execute',
+							name = L['Remove Spell'],
+							func = function()
+								if E.global['nameplate']['spellList'][selectedSpellName] then
+									E.global['nameplate']['spellList'][selectedSpellName] = nil
+									selectedSpellName = ""
+									UpdateSpellGroup()
+								end
+							end
+						},
+					},
+				},
+				otherSpells = {
+					order = 2,
+					type = "group",
+					name = L["Other Auras"],
+					args = {
+						intro = {
+							order = 1,
+							type = "description",
+							name = L["These are the settings for all spells not explicitly specified."],
+						},
+						visibility = {
+							type = 'select',
+							order = 2,
+							name = L['Visibility'],
+							desc = L['Set when this aura is visble.'],
+							values = {[1]="Always",[2]="Never",[3]="Only Mine"},
+							get = function(info)
+								return E.global['nameplate']['spellListDefault']["visibility"]
+							end,
+							set = function(info, value)
+								E.global['nameplate']['spellListDefault']["visibility"] = value
+							end,
+						},
+						width = {
+							type = 'range',
+							order = 3,
+							name = L['Icon Width'],
+							desc = L['Set the width of this spells icon.'],
+							min = 10,
+							max = 100,
+							step = 2,
+							get = function(info)
+								return E.global['nameplate']['spellListDefault']["width"]
+							end,
+							set = function(info, value)
+								E.global['nameplate']['spellListDefault']["width"] = value
+								if E.global['nameplate']['spellListDefault']["lockAspect"] then
+									E.global['nameplate']['spellListDefault']["height"] = value
+								end
+							end,
+						},
+						height = {
+							type = 'range',
+							order = 4,
+							name = L['Icon Height'],
+							desc = L['Set the height of this spells icon.'],
+							disabled = function() return E.global['nameplate']['spellListDefault']["lockAspect"] end,
+							min = 10,
+							max = 100,
+							step = 2,
+							get = function(info)
+								return E.global['nameplate']['spellListDefault']["height"]
+							end,
+							set = function(info, value)
+								E.global['nameplate']['spellListDefault']["height"] = value
+							end,
+						},
+						lockAspect = {
+							type = 'toggle',
+							order = 5,
+							name = L['Lock Aspect Ratio'],
+							desc = L['Set if height and width are locked to the same value.'],
+							get = function(info)
+								return E.global['nameplate']['spellListDefault']["lockAspect"]
+							end,
+							set = function(info, value)
+								E.global['nameplate']['spellListDefault']["lockAspect"] = value
+								if value then
+									E.global['nameplate']['spellListDefault']["height"] = E.global['nameplate']['spellListDefault']["width"]
+								end
+							end,
+						},
+						flashTime = {
+							type = 'range',
+							order = 6,
+							name = L['Flash Duration'],
+							desc = L['Set the time in seconds that the icon will begin flashing.'],
+							min = 0,
+							max = 10,
+							step = 1,
+							get = function(info)
+								return E.global['nameplate']['spellListDefault']["flashTime"]
+							end,
+							set = function(info, value)
+								E.global['nameplate']['spellListDefault']["flashTime"] = value
+							end,
+						},
+						text = {
+							type = 'range',
+							order = 7,
+							name = L['Text Size'],
+							desc = L['Size of the timer text.'],
+							min = 6,
+							max = 24,
+							step = 1,
+							get = function(info)
+								return E.global['nameplate']['spellListDefault']["text"]
+							end,
+							set = function(info, value)
+								E.global['nameplate']['spellListDefault']["text"] = value
+							end,
+						},
+					},
+				},
+			},
+		},
 		filters = {
 			type = "group",
-			order = 5,
+			order = 6,
 			name = L["Filters"],
 			disabled = function() return not E.NamePlates; end,
 			args = {
@@ -373,3 +790,497 @@ E.Options.args.nameplate = {
 		},
 	},
 }
+
+G["nameplate"]["spellListDefault"] = {
+	['visibility'] = 1,
+	['width'] = 20,
+	['height'] = 20,
+	['lockaspect'] = true,
+	['text'] = 7,
+	['flashTime'] = 3,
+	['firstLoad'] = true,
+	['defaultSpellList'] = {
+		["Shockwave"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Cloak of Shadows"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Deterrence"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Death Coil"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Polymorph"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Netherstorm Flag"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 70,
+			["text"] = 16,
+			["visibility"] = 1,
+			["width"] = 70,
+		},
+		["Hammer of Justice"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Ring of Frost"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Silence"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Bad Manner"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Hibernate"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Concussion Blow"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Divine Protection"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Blind"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Turn Evil"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Throwdown"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Banish"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Strangulate"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Seduction"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Anti-Magic Shell"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Sprint"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Ice Block"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Silencing Shot"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Gnaw"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Hungering Cold"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 16,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Freezing Trap"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Cyclone"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Divine Shield"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Intimidating Shout"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Hand of Protection"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Silenced - Gag Order"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Disarm"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Shield Wall"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Master's Call"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Scatter Shot"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Horde Flag"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 70,
+			["text"] = 16,
+			["visibility"] = 1,
+			["width"] = 70,
+		},
+		["Sap"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Guardian Spirit"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Deep Freeze"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Hand of Freedom"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Psychic Horror"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Pain Suppression"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Dispersion"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Hex"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Lichborne"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Howl of Terror"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 16,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Dismantle"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Wyvern Sting"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Nature's Grasp"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Icebound Fortitude"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Barkskin"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Evasion"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Mind Control"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Alliance Flag"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 70,
+			["text"] = 16,
+			["visibility"] = 1,
+			["width"] = 70,
+		},
+		["Enraged Regeneration"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Dash"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Innervate"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 40,
+			["text"] = 12,
+			["visibility"] = 1,
+			["width"] = 40,
+		},
+		["Fear"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 16,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["Repentance"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+		["School Lockout"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 3,
+			["height"] = 50,
+			["text"] = 14,
+			["visibility"] = 1,
+			["width"] = 50,
+		},
+	}
+}
+
+G["nameplate"]["spellList"] = { }

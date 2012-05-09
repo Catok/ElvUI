@@ -2,11 +2,11 @@ local E, L, V, P, G = unpack(select(2, ...)); --Inport: Engine, Locales, Private
 local NP = E:GetModule('NamePlates')
 
 --[[
-	This file handles functions for the Castbar and Debuff modules of nameplates.
+	This file handles functions for the Castbar and aura modules of nameplates.
 ]]
 NP.GroupMembers = {};
 NP.CachedAuraDurations = {};
-NP.DebuffCache = {}
+NP.AuraCache = {}
 NP.RaidTargetReference = {
 	["STAR"] = 0x00000001,
 	["CIRCLE"] = 0x00000002,
@@ -23,7 +23,7 @@ local AURA_TYPE_DEBUFF = 6
 local AURA_TARGET_HOSTILE = 1
 local AURA_TARGET_FRIENDLY = 2
 local AuraList, AuraGUID = {}, {}
-NP.MAX_DISPLAYABLE_DEBUFFS = 5
+NP.MAX_DISPLAYABLE_AURAS = 5
 
 local AURA_TYPE = {
 	["Buff"] = 1,
@@ -64,6 +64,9 @@ NP.Aura_Duration = {}
 NP.Aura_Texture = {}
 NP.Aura_Type = {}
 NP.Aura_Target = {}
+NP.GUIDLockouts = {}
+NP.GUIDDR = {}
+NP.resetDRTime = 18 --Time it tacks for DR to reset.
 
 do
 	local PolledHideIn
@@ -77,15 +80,15 @@ do
 		local curTime = GetTime()
 		if curTime < timeToUpdate then return end
 		local framecount = 0
-		timeToUpdate = curTime + 1
+		timeToUpdate = curTime + 0.1
 		-- Cycle through the watchlist, hiding frames which are timed-out
-		for frame, expiration in pairs(Framelist) do
-			-- If expired...
-			if expiration < curTime then frame:Hide(); Framelist[frame] = nil
-			-- If active...
-			else 
+		for frame, auraData in pairs(Framelist) do
+			if auraData.e ~= -1 and auraData.e < curTime then -- If expired...
+				frame:Hide()
+				Framelist[frame] = nil
+			else  -- If active...
 				-- Update the frame
-				if frame.Poll then frame.Poll(NP, frame, expiration) end
+				if frame.Poll then frame.Poll(NP, frame, auraData.e, auraData.d) end
 				framecount = framecount + 1 
 			end
 		end
@@ -93,20 +96,21 @@ do
 		if framecount == 0 then Watcherframe:SetScript("OnUpdate", nil); WatcherframeActive = false end
 	end
 	
-	function PolledHideIn(frame, expiration)
-	
-		if expiration == 0 then 
-			
-			frame:Hide()
-			Framelist[frame] = nil
-		else
-			--print("Hiding in", expiration - GetTime())
-			Framelist[frame] = expiration
-			frame:Show()
-			
-			if not WatcherframeActive then 
-				Watcherframe:SetScript("OnUpdate", CheckFramelist)
-				WatcherframeActive = true
+	function PolledHideIn(frame, expiration, duration)
+		if frame then
+			if expiration == 0 then 
+				
+				frame:Hide()
+				Framelist[frame] = nil
+			else
+				--print("Hiding in", expiration - GetTime())
+				Framelist[frame] = {e = expiration, d = duration}
+				frame:Show()
+				
+				if not WatcherframeActive then 
+					Watcherframe:SetScript("OnUpdate", CheckFramelist)
+					WatcherframeActive = true
+				end
 			end
 		end
 	end
@@ -114,8 +118,8 @@ do
 	NP.PolledHideIn = PolledHideIn
 end
 
-local function DefaultFilterFunction(debuff) 
-	if (debuff.duration < 600) then
+local function DefaultFilterFunction(aura) 
+	if (aura.duration < 600) then
 		return true
 	end
 end
@@ -123,8 +127,8 @@ end
 function NP:CreateAuraIcon(parent)
 	local noscalemult = E.mult * UIParent:GetScale()
 	local button = CreateFrame("Frame",nil,parent)
-	button:SetWidth(25)
-	button:SetHeight(25)
+	button:SetWidth(20)
+	button:SetHeight(20)
 	button:SetScript('OnHide', function()
 		if parent.guid then
 			NP:UpdateIconGrid(parent, parent.guid)
@@ -150,12 +154,10 @@ function NP:CreateAuraIcon(parent)
 	button.Icon = button:CreateTexture(nil, "BORDER")
 	button.Icon:SetPoint("TOPLEFT",button,"TOPLEFT", noscalemult*3,-noscalemult*3)
 	button.Icon:SetPoint("BOTTOMRIGHT",button,"BOTTOMRIGHT",-noscalemult*3,noscalemult*3)
-	button.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 	
 	button.TimeLeft = button:CreateFontString(nil, 'OVERLAY')
-	button.TimeLeft:Point('CENTER', 1, 1)
-	button.TimeLeft:SetJustifyH('CENTER')	
-	button.TimeLeft:FontTemplate(nil, 12, 'OUTLINE')
+	button.TimeLeft:SetPoint('CENTER', button, 'CENTER', 1, 0)
+	button.TimeLeft:FontTemplate(nil, 7, 'OUTLINE')
 	button.TimeLeft:SetShadowColor(0, 0, 0, 0)
 	
 	button.Stacks = button:CreateFontString(nil,"OVERLAY")
@@ -168,6 +170,7 @@ function NP:CreateAuraIcon(parent)
 		Icon = "",
 		Stacks = 0,
 		Expiration = 0,
+		Duration = 0,
 		Type = "",
 	}			
 
@@ -177,20 +180,69 @@ function NP:CreateAuraIcon(parent)
 	return button
 end
 
-function NP:UpdateAuraTime(frame, expiration)
-	local timeleft = ceil(expiration-GetTime())
-	if timeleft > 60 then 
-		frame.TimeLeft:SetText(ceil(timeleft/60).."m")
+function NP:UpdateAuraTime(frame, expiration, duration)
+	local timeLeft = expiration - GetTime()
+	
+	if timeLeft > 60 then 
+		frame.TimeLeft:SetText(ceil(timeLeft/60).."m")
 	else
-		frame.TimeLeft:SetText(ceil(timeleft))
+		if E.db.nameplate['preciseTimer'] and timeLeft < 3 then
+			frame.TimeLeft:SetText(format("%.1f", timeLeft))
+		else
+			frame.TimeLeft:SetText(ceil(timeLeft))
+		end
 	end
+
+	-- Time Left
+	local textColor = {r = 1, g = 1, b = 1}
+	
+	if E.db.nameplate['colorByTime'] then
+		local percentage = (timeLeft / duration) * 100
+		
+		if percentage >= 50 then
+			--green to yellow
+			textColor.g	= 1
+			textColor.r = ((100 - percentage) / 100) * 2
+		else
+			--yellow to red
+			textColor.r	= 1
+			textColor.g = ((100 - (100 - percentage)) / 100) * 2
+		end
+		
+		textColor.b = 0
+	elseif E.db.nameplate['timerColor'] then
+		textColor = E.db.nameplate['timerColor']
+	end
+	
+	-- Flashing
+	local flashTime = 0
+	
+	if spell and spell['flashTime'] then
+		flashTime = spell['flashTime']
+	elseif E.global['nameplate']['spellListDefault']['flashTime'] then
+		flashTime = E.global['nameplate']['spellListDefault']['flashTime']
+	end
+	
+	if timeLeft <= flashTime and duration >= flashTime then 
+		if not UIFrameIsFlashing(frame) then
+			UIFrameFlash(frame, 0.5, 0.5, timeLeft, false, 0.3, 0.01, 1)
+		end
+	else
+		if UIFrameIsFlashing(frame) then
+			UIFrameFlashStop(frame)
+			frame:SetAlpha(1)
+		end
+	end
+	
+	frame.TimeLeft:SetTextColor(textColor.r, textColor.g, textColor.b, 1)
 end
 
 function NP:ClearAuraContext(frame)
-	if frame.guidcache then 
-		AuraGUID[frame.guidcache] = nil 
-		frame.unit = nil
-	end
+	--if frame.guidcache then 
+	--	AuraGUID[frame.guidcache] = nil 
+	frame.guidcache = nil
+	frame.unit = nil
+	--end
 	AuraList[frame] = nil
 end
 
@@ -215,7 +267,7 @@ function NP:UpdateAuraContext(frame)
 	
 	local frame = NP:SearchForFrame(guid, raidicon, parent.hp.name:GetText())
 	if frame then
-		NP:UpdateDebuffs(frame)
+		NP:UpdateAuras(frame)
 	end
 end
 
@@ -292,32 +344,65 @@ function NP:SearchForFrame(guid, raidicon, name)
 	return frame
 end
 
-function NP:SetAuraInstance(guid, spellid, expiration, stacks, caster, duration, texture, auratype, auratarget)
+function NP:SetAuraInstance(guid, spellid, expiration, stacks, caster, duration, texture, auratype, auratarget, overrideDR)
 	local filter = false
-	if (self.db.trackauras and caster == UnitGUID('player')) then
+	local name = GetSpellInfo(spellid)
+	
+	if auratype == -1 then
+		name = "School Lockout";
+	end
+	
+	local visibility = E.global['nameplate']['spellListDefault']['visibility']
+	if visibility  == 1 or (visibility == 3 and caster == UnitGUID('player')) then
 		filter = true;
 	end
-
-	if self.db.trackfilter and #self.db.trackfilter > 1 then
-		local name = GetSpellInfo(spellid)
-		local spellList = E.global['unitframe']['aurafilters'][self.db.trackfilter].spells
-		local type = E.global['unitframe']['aurafilters'][self.db.trackfilter].type
-		if type == 'Blacklist' then
-			if spellList[name] then
-				filter = false;
-			end
+	
+	local spellList = E.global['nameplate']['spellList']
+	if spellList[name] then
+		visibility = spellList[name]['visibility']
+		if visibility  == 1 or (visibility == 3 and caster == UnitGUID('player')) then
+			filter = true;
 		else
-			if spellList[name] then
-				filter = true;
-			end
+			filter = false;
 		end
 	end
-
+	
 	if filter ~= true then
 		return;
 	end
 
-	if guid and spellid and caster and texture then
+	if guid and spellid and texture then
+		if GetPlayerInfoByGUID(guid) then
+			local DRType = NP.drSpells[spellid]
+			
+			if DRType and not overrideDR then
+				local newDR = { diminish = 0.5, DRExpire = GetTime() + NP.resetDRTime }
+				
+				if NP.GUIDDR[guid] and NP.GUIDDR[guid][DRType] then
+					if NP.GUIDDR[guid][DRType].DRExpire < GetTime() then
+						NP.GUIDDR[guid][DRType].DRExpire = GetTime() + NP.resetDRTime
+						NP.GUIDDR[guid][DRType].diminish = 0.5
+					elseif NP.GUIDDR[guid][DRType].diminish >= 0.25 then
+						NP.GUIDDR[guid][DRType].DRExpire = GetTime() + NP.resetDRTime
+						duration = duration * NP.GUIDDR[guid][DRType].diminish
+						NP.GUIDDR[guid][DRType].diminish = NP.GUIDDR[guid][DRType].diminish / 2
+					else
+						-- This shouldn't happen
+					end
+				elseif NP.GUIDDR[guid] and not NP.GUIDDR[guid][DRType] then
+					NP.GUIDDR[guid][DRType] = newDR
+				else
+					NP.GUIDDR[guid] = { }
+					tinsert(NP.GUIDDR[guid], { DRType = newDR })
+				end
+			end
+		end
+		
+		--Special check for BG flags
+		if spellid == 14267 or spellid == 14268 or spellid == 34976 then
+			NP:WipeAura(spellid)
+		end
+	
 		local aura_id = spellid..(tostring(caster or "UNKNOWN_CASTER"))
 		local aura_instance_id = guid..aura_id
 		NP.Aura_List[guid] = NP.Aura_List[guid] or {}
@@ -333,7 +418,7 @@ function NP:SetAuraInstance(guid, spellid, expiration, stacks, caster, duration,
 	end
 end
 
-function NP:RemoveAuraInstance()
+function NP:RemoveAuraInstance(guid, spellid, caster)
 	if guid and spellid and NP.Aura_List[guid] then
 		local aura_instance_id = tostring(guid)..tostring(spellid)..(tostring(caster or "UNKNOWN_CASTER"))
 		local aura_id = spellid..(tostring(caster or "UNKNOWN_CASTER"))
@@ -351,7 +436,7 @@ function NP:RemoveAuraInstance()
 	end
 end
 
-function NP:UpdateAuraByLookup(guid)
+function NP:UpdateAuraByLookup(guid, name)
  	if guid == UnitGUID("target") then
 		NP:UpdateAurasByUnitID("target")
 	elseif guid == UnitGUID("mouseover") then
@@ -363,22 +448,64 @@ function NP:UpdateAuraByLookup(guid)
 			if guid == unittarget then
 				NP:UpdateAurasByUnitID(unittarget)
 			end
-		end		
+		end	
+	else
+		NP:UpdateAurasByGUID(guid, name)
 	end
 end
 
 function NP:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, ...)
-	local _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellid, spellName, _, auraType, stackCount  = ...
-
+	local _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellid, spellName, _, auraType, stackCount, extraSchool  = ...
+	local isPvP = false
+	
+	if bit.band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 and bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then
+		isPvP = true
+	end
+	
+	local shortDestName = NP:RemoveServerName(destName)
+	local shortSourceName = NP:RemoveServerName(sourceName)
+	
+	-- Cache Unit Name for alternative lookup strategy
+	if shortDestName and destGUID and bit.band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 and not NP.ByName[shortDestName] then 
+		NP.ByName[shortDestName] = destGUID
+	end
+	if shortSourceName and sourceGUID and bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 and not NP.ByName[shortSourceName] then 
+		NP.ByName[shortSourceName] = sourceGUID
+	end
+	
+	if event == "SPELL_INTERRUPT" and NP.lockouts[spellid] then
+		local texture = GetSpellTexture(spellid)
+		if not NP.GUIDLockouts[destGUID] then
+			NP.GUIDLockouts[destGUID] = {  }
+		end
+		NP.GUIDLockouts[destGUID][extraSchool] = { dest = destGUID, source = sourceGUID, destSpell = auraType, sourceSpell = spellid, expire = GetTime() + NP.lockouts[spellid], dur = NP.lockouts[spellid], tex = texture }
+		NP:SetAuraInstance(destGUID, auraType, GetTime() + NP.lockouts[spellid], 1, sourceGUID, NP.lockouts[spellid], texture, -1, AURA_TARGET_HOSTILE, true)
+	end
+	
 	if event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" then
-		local duration = NP:GetSpellDuration(spellid)
+		local duration = NP:GetSpellDuration(spellid, isPvP)
+		local expiration = 0
 		local texture = GetSpellTexture(spellid)
-				
-		NP:SetAuraInstance(destGUID, spellid, GetTime() + (duration or 0), 1, sourceGUID, duration, texture, AURA_TYPE_DEBUFF, AURA_TARGET_HOSTILE)
+		
+		if duration > 0 then
+			expiration = duration + GetTime()
+		end
+		
+		if duration ~= -1 then
+			NP:SetAuraInstance(destGUID, spellid, expiration, 1, sourceGUID, duration, texture, AURA_TYPE_DEBUFF, AURA_TARGET_HOSTILE, false)
+		end
 	elseif event == "SPELL_AURA_APPLIED_DOSE" or event == "SPELL_AURA_REMOVED_DOSE" then
-		local duration = NP:GetSpellDuration(spellid)
+		local duration = NP:GetSpellDuration(spellid, isPvP)
+		local expiration = 0
 		local texture = GetSpellTexture(spellid)
-		NP:SetAuraInstance(destGUID, spellid, GetTime() + (duration or 0), stackCount, sourceGUID, duration, texture, AURA_TYPE_DEBUFF, AURA_TARGET_HOSTILE)
+		
+		if duration > 0 then
+			expiration = duration + GetTime()
+		end
+		
+		if duration ~= -1 then
+			NP:SetAuraInstance(destGUID, spellid, expiration, stackCount, sourceGUID, duration, texture, AURA_TYPE_DEBUFF, AURA_TARGET_HOSTILE, false)
+		end
 	elseif event == "SPELL_AURA_BROKEN" or event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_AURA_REMOVED" then
 		NP:RemoveAuraInstance(destGUID, spellid, sourceGUID)
 	elseif event == "SPELL_CAST_START" then
@@ -459,31 +586,19 @@ function NP:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, ...)
 		end			
 	end
 
-	if event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" or event == "SPELL_AURA_REMOVED_DOSE" or event == "SPELL_AURA_BROKEN" or event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_AURA_REMOVED" then
-		if (bit.band(destFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0) and auraType == 'DEBUFF' then		
-			NP:UpdateAuraByLookup(destGUID)
-			local name, raidicon
-			-- Cache Unit Name for alternative lookup strategy
-			if bit.band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then 
-				local rawName = strsplit("-", destName)			-- Strip server name from players
-				NP.ByName[rawName] = destGUID
-				name = rawName
+	if event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" or event == "SPELL_AURA_REMOVED_DOSE" or event == "SPELL_AURA_BROKEN" or event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_AURA_REMOVED" then	
+		NP:UpdateAuraByLookup(destGUID, shortDestName)
+		
+		-- Cache Raid Icon Data for alternative lookup strategy
+		for iconname, bitmask in pairs(NP.RaidTargetReference) do
+			if bit.band(destRaidFlags, bitmask) > 0  then
+				NP.ByRaidIcon[iconname] = destGUID
+				raidicon = iconname
+				break
 			end
-			-- Cache Raid Icon Data for alternative lookup strategy
-			for iconname, bitmask in pairs(NP.RaidTargetReference) do
-				if bit.band(destRaidFlags, bitmask) > 0  then
-					NP.ByRaidIcon[iconname] = destGUID
-					raidicon = iconname
-					break
-				end
-			end
-			
-			local frame = self:SearchForFrame(destGUID, raidicon, name)	
-			if frame then
-				NP:UpdateDebuffs(frame)
-			end				
-		end
+		end			
 	end	
+	
 end
 
 function NP:PLAYER_REGEN_ENABLED()
@@ -539,7 +654,8 @@ function NP:CleanAuraLists()
 		local auracount = 0
 		for aura_id, aura_instance_id in pairs(instance_list) do
 			local expiration = NP.Aura_Expiration[aura_instance_id]
-			if expiration and expiration < currentTime then
+			if expiration and expiration < currentTime and expiration ~= 0 then
+				--print("Cleaned "..NP.Aura_Spellid[aura_instance_id].." Exp was "..expiration)
 				NP.Aura_List[guid][aura_id] = nil
 				NP.Aura_Spellid[aura_instance_id] = nil
 				NP.Aura_Expiration[aura_instance_id] = nil
@@ -549,6 +665,7 @@ function NP:CleanAuraLists()
 				NP.Aura_Texture[aura_instance_id] = nil
 				NP.Aura_Type[aura_instance_id] = nil
 				NP.Aura_Target[aura_instance_id] = nil
+			else
 				auracount = auracount + 1
 			end
 		end
@@ -602,12 +719,40 @@ function NP:WipeAuraList(guid)
 	end
 end
 
-function NP:GetSpellDuration(spellid)
-	if spellid then return NP.CachedAuraDurations[spellid] end
+function NP:WipeAura(spellid)
+	for guid, unit_aura_list in pairs(self.Aura_List) do 
+		for aura_id, aura_instance_id in pairs(unit_aura_list) do
+			if self.Aura_Spellid[aura_instance_id] == spellid then
+				self.Aura_Spellid[aura_instance_id] = nil
+				self.Aura_Expiration[aura_instance_id] = nil
+				self.Aura_Stacks[aura_instance_id] = nil
+				self.Aura_Caster[aura_instance_id] = nil
+				self.Aura_Duration[aura_instance_id] = nil
+				self.Aura_Texture[aura_instance_id] = nil
+				self.Aura_Type[aura_instance_id] = nil
+				self.Aura_Target[aura_instance_id] = nil
+				unit_aura_list[aura_id] = nil
+			end
+		end
+	end
+end
+
+function NP:GetSpellDuration(spellid, pvp)
+	if NP.auraInfoPvP[spellid] and pvp then
+		return NP.auraInfoPvP[spellid]
+	elseif NP.auraInfo[spellid] then
+		return NP.auraInfo[spellid]
+	elseif NP.CachedAuraDurations[spellid] then
+		return NP.CachedAuraDurations[spellid]
+	else
+		return -1
+	end
 end
 
 function NP:SetSpellDuration(spellid, duration)
-	if spellid then NP.CachedAuraDurations[spellid] = duration end
+	if spellid and not NP.auraInfo[spellid] then 
+		NP.CachedAuraDurations[spellid] = duration
+	end
 end
 
 function NP:GetAuraList(guid)
@@ -630,22 +775,78 @@ function NP:GetAuraInstance(guid, aura_id)
 	end
 end
 
-function NP:UpdateIcon(frame, texture, expiration, stacks)
+function NP:UpdateIcon(frame, texture, expiration, stacks, duration, name)
 
-	if frame and texture and expiration then
+	if frame and texture and name then
+		local spell = E.global['nameplate']['spellList'][name]
+		
 		-- Icon
 		frame.Icon:SetTexture(texture)
 		
-		-- Stacks
-		if stacks > 1 then frame.Stacks:SetText(stacks)
-		else frame.Stacks:SetText("") end
+		-- Size
+		local width = 20
+		local height = 20
 		
-		-- Expiration
-		NP:UpdateAuraTime(frame, expiration)
-		frame:Show()
-		NP.PolledHideIn(frame, expiration)
+		if spell and spell['width'] then
+			width = spell['width']
+		elseif E.global['nameplate']['spellListDefault']['width'] then
+			width = E.global['nameplate']['spellListDefault']['width']
+		end
+		
+		if spell and spell['height'] then
+			height = spell['height']
+		elseif E.global['nameplate']['spellListDefault']['height'] then
+			height = E.global['nameplate']['spellListDefault']['height']
+		end
+		
+		if width > height then
+			local aspect = height / width
+			frame.Icon:SetTexCoord(0.07, 0.93, (0.5 - (aspect/2))+0.07, (0.5 + (aspect/2))-0.07)
+		elseif height > width then
+			local aspect = width / height
+			frame.Icon:SetTexCoord((0.5 - (aspect/2))+0.07, (0.5 + (aspect/2))-0.07, 0.07, 0.93)
+		else
+			frame.Icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+		end
+		
+		frame:SetWidth(width)
+		frame:SetHeight(height)
+		
+		-- Stacks
+		local textSize = 7
+		
+		if spell and spell['text'] then
+			textSize = spell['text']
+		elseif E.global['nameplate']['spellListDefault']['text'] then
+			textSize = E.global['nameplate']['spellListDefault']['text']
+		end
+		
+		frame.Stacks:FontTemplate(nil, textSize, 'OUTLINE')
+		if stacks > 1 then
+			frame.Stacks:SetText(stacks)
+		else
+			frame.Stacks:SetText("")
+		end
+		
+		if duration > 0 and expiration then
+			frame.TimeLeft:FontTemplate(nil, textSize, 'OUTLINE')
+			frame.TimeLeft:Show()
+			
+			-- Expiration
+			NP:UpdateAuraTime(frame, expiration, duration)
+			frame:Show()
+			NP.PolledHideIn(frame, expiration, duration)
+		else
+			frame:Show()
+			frame.TimeLeft:Hide()
+			NP.PolledHideIn(frame, -1, duration)
+		end
 	else 
-		NP.PolledHideIn(frame, 0)
+		if UIFrameIsFlashing(frame) then
+			UIFrameFlashStop(frame)
+			frame:SetAlpha(1)
+		end
+		NP.PolledHideIn(frame, 0, duration)
 	end
 end
 
@@ -656,49 +857,80 @@ function NP:UpdateIconGrid(frame, guid)
 	local AuraSlotIndex = 1
 	local instanceid
 	
-	self.DebuffCache = wipe(self.DebuffCache)
-	local debuffCount = 0
+	self.AuraCache = wipe(self.AuraCache)
+	local auraCount = 0
 	
-	-- Cache displayable debuffs
+	-- Cache displayable auras
 	if AurasOnUnit then
 		widget:Show()
 		for instanceid in pairs(AurasOnUnit) do
-			
 			--for i,v in pairs(aura) do aura[i] = nil end
 			local aura = {}
 			aura.spellid, aura.expiration, aura.stacks, aura.caster, aura.duration, aura.texture, aura.type, aura.target = self:GetAuraInstance(guid, instanceid)
 			if tonumber(aura.spellid) then
 				aura.name = GetSpellInfo(tonumber(aura.spellid))
+				if aura.type == -1 then
+					aura.name = "School Lockout"
+				end
 				aura.unit = frame.unit
 				
 				-- Get Order/Priority
-				if aura.expiration > GetTime() then
-					debuffCount = debuffCount + 1
-					self.DebuffCache[debuffCount] = aura
+				if aura.expiration > GetTime() or aura.duration == 0 then
+					auraCount = auraCount + 1
+					self.AuraCache[auraCount] = aura
 				end
 			end
 		end
 	end
 	
+	sort(self.AuraCache, 
+		function(a, b)
+			if E.db.nameplate['sortDirection'] == 0 then
+				return a.expiration < b.expiration 
+			else
+				return a.expiration > b.expiration 
+			end
+		end
+	)
+	
 	-- Display Auras
-	if debuffCount > 0 then 
-		for index = 1,  #self.DebuffCache do
-			local cachedaura = self.DebuffCache[index]
+	local rightWidth = 0
+	local leftWidth = 0
+	if auraCount > 0 then 
+		for index = 1,  #self.AuraCache do
+			local cachedaura = self.AuraCache[index]
 			if cachedaura.spellid and cachedaura.expiration then 
-				self:UpdateIcon(AuraIconFrames[AuraSlotIndex], cachedaura.texture, cachedaura.expiration, cachedaura.stacks) 
+				self:UpdateIcon(AuraIconFrames[AuraSlotIndex], cachedaura.texture, cachedaura.expiration, cachedaura.stacks, cachedaura.duration, cachedaura.name) 
+				if index > 1 and mod(index,2) == 0 then
+					rightWidth = rightWidth + AuraIconFrames[AuraSlotIndex]:GetWidth()
+				elseif index > 1 and mod(index,2) ~= 0 then
+					leftWidth = leftWidth + AuraIconFrames[AuraSlotIndex]:GetWidth()
+				end
 				AuraSlotIndex = AuraSlotIndex + 1
 			end
-			if AuraSlotIndex > NP.MAX_DISPLAYABLE_DEBUFFS then break end
+			if AuraSlotIndex > NP.MAX_DISPLAYABLE_AURAS then break end
 		end
 	end
 	
-	-- Clear Extra Slots
-	for AuraSlotIndex = AuraSlotIndex, NP.MAX_DISPLAYABLE_DEBUFFS do self:UpdateIcon(AuraIconFrames[AuraSlotIndex]) end
+	if E.db.nameplate['auraAnchor'] and E.db.nameplate['auraAnchor'] == 2 then
+		local offset = 0
+		
+		if rightWidth > leftWidth then
+			offset = ( abs(rightWidth - leftWidth) / 2 ) * -1
+		elseif leftWidth > rightWidth then
+			offset = abs(leftWidth - rightWidth) / 2
+		end
+		
+		AuraIconFrames[1]:SetPoint("BOTTOM", widget, offset, 3)
+	end
 	
-	self.DebuffCache = wipe(self.DebuffCache)
+	-- Clear Extra Slots
+	for AuraSlotIndex = AuraSlotIndex, NP.MAX_DISPLAYABLE_AURAS do self:UpdateIcon(AuraIconFrames[AuraSlotIndex]) end
+	
+	self.AuraCache = wipe(self.AuraCache)
 end
 
-function NP:UpdateDebuffs(frame)
+function NP:UpdateAuras(frame)
 	-- Check for ID
 	local guid = frame.guid
 	
@@ -722,23 +954,39 @@ function NP:UpdateDebuffs(frame)
 end
 
 function NP:UpdateAurasByUnitID(unit)
-	-- Limit to enemies, for now
 	local unitType
 	if UnitIsFriend("player", unit) then unitType = AURA_TARGET_FRIENDLY else unitType = AURA_TARGET_HOSTILE end	
-	if unitType == AURA_TARGET_FRIENDLY then return end		-- Filter
+	--if unitType == AURA_TARGET_FRIENDLY then return end		-- Filter
 	
-	-- Check the units Debuffs
+	-- Check the units auras
 	local index
 	local guid = UnitGUID(unit)
 	-- Reset Auras for a guid
 	self:WipeAuraList(guid)
+	
 	-- Debuffs
 	for index = 1, 40 do
 		local name , _, texture, count, dispelType, duration, expirationTime, unitCaster, _, _, spellid, _, isBossDebuff = UnitDebuff(unit, index)
 		if not name then break end
 		NP:SetSpellDuration(spellid, duration)			-- Caches the aura data for times when the duration cannot be determined (ie. via combat log)
-		NP:SetAuraInstance(guid, spellid, expirationTime, count, UnitGUID(unitCaster or ""), duration, texture, AURA_TYPE[dispelType or "Debuff"], unitType)
+		NP:SetAuraInstance(guid, spellid, expirationTime, count, UnitGUID(unitCaster or ""), duration, texture, AURA_TYPE[dispelType or "Debuff"], unitType, true)
 	end	
+	
+	-- Buffs
+	for index = 1, 40 do
+		local name , _, texture, count, dispelType, duration, expirationTime, unitCaster, _, _, spellid, _, isBossDebuff = UnitBuff(unit, index)
+		if not name then break end
+		NP:SetSpellDuration(spellid, duration)			-- Caches the aura data for times when the duration cannot be determined (ie. via combat log)
+		NP:SetAuraInstance(guid, spellid, expirationTime, count, UnitGUID(unitCaster or ""), duration, texture, AURA_TYPE[dispelType or "Buff"], unitType, true)
+	end	
+	
+	if  NP.GUIDLockouts[guid] then
+		for school,data in pairs(NP.GUIDLockouts[guid]) do
+			if data.expire > GetTime() then
+				NP:SetAuraInstance(data.dest, data.destSpell, data.expire, 1, data.source, data.dur, data.tex, -1, AURA_TARGET_HOSTILE, true)
+			end
+		end
+	end
 
 	local raidicon, name
 	if UnitPlayerControlled(unit) then name = UnitName(unit) end
@@ -748,7 +996,17 @@ function NP:UpdateAurasByUnitID(unit)
 	local frame = self:SearchForFrame(guid, raidicon, name)
 	
 	if frame then
-		NP:UpdateDebuffs(frame)
+		NP:UpdateAuras(frame)
+	end
+end
+
+function NP:UpdateAurasByGUID(guid, name)
+	if not GetPlayerInfoByGUID(guid) then return end
+	local frame = self:SearchForFrame(guid, nil, name)
+	
+	if frame then
+		frame.guid = guid
+		NP:UpdateAuras(frame)
 	end
 end
 
@@ -768,6 +1026,8 @@ function NP:UNIT_AURA(event, unit)
 		self:UpdateAurasByUnitID("target")
 	elseif unit == "focus" then
 		self:UpdateAurasByUnitID("focus")
+	elseif UnitIsPlayer(unit) then
+		self:UpdateAurasByUnitID(unit)
 	end
 end
 
@@ -859,4 +1119,14 @@ function NP:CastBar_OnValueChanged(frame)
 	else 
 		NP:StopCastAnimation(frame:GetParent()) 
 	end
+end
+
+function NP:RemoveServerName(name)
+	if name ~= nil then
+		local loc = name:find("-")
+		if loc then
+			name = name:sub(0, loc - 1)
+		end
+	end
+	return name
 end
