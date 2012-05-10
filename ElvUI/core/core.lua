@@ -218,6 +218,13 @@ function E:InitializeInitialModules()
 	end
 end
 
+function E:RefreshModulesDB()
+	local UF = self:GetModule('UnitFrames')
+	table.wipe(UF.db)
+	UF.db = self.db.unitframe
+	ElvUF:ResetDB()
+end
+
 function E:InitializeModules()	
 	for _, module in pairs(E['RegisteredModules']) do
 		if self:GetModule(module).Initialize then
@@ -556,6 +563,13 @@ function E:LoadKeybinds()
 end]]
 
 function E:UpdateAll()
+	self.data = LibStub("AceDB-3.0"):New("ElvData", self.DF);
+	self.data.RegisterCallback(self, "OnProfileChanged", "UpdateAll")
+	self.data.RegisterCallback(self, "OnProfileCopied", "UpdateAll")
+	self.data.RegisterCallback(self, "OnProfileReset", "OnProfileReset")
+	self.db = self.data.profile;
+	self.global = self.data.global;
+
 	self:UpdateMedia()
 	self:UpdateFrameTemplates()
 	self:SetMoversPositions()
@@ -629,6 +643,15 @@ end
 hooksecurefunc("UnitPopup_ShowMenu", showMenu)
 
 function E:Initialize()
+	table.wipe(self.db)
+	table.wipe(self.global)
+
+	self.data = LibStub("AceDB-3.0"):New("ElvData", self.DF);
+	self.data.RegisterCallback(self, "OnProfileChanged", "UpdateAll")
+	self.data.RegisterCallback(self, "OnProfileCopied", "UpdateAll")
+	self.data.RegisterCallback(self, "OnProfileReset", "OnProfileReset")
+	self.db = self.data.profile;
+	self.global = self.data.global;
 	self:CheckIncompatible()
 	
 	self:CheckRole()
@@ -682,7 +705,7 @@ function E:Initialize()
 	--self:SaveKeybinds()
 	
 	self:GetModule('Minimap'):UpdateSettings()
-	
+	self:RefreshModulesDB()
 	collectgarbage("collect");
 end
 
