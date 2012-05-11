@@ -18,12 +18,13 @@ function M:SkinBubble(frame)
 			frame.text = region
 		end
 	end
-	NP:CreateVirtualFrame(frame)	
-	NP:SetVirtualBorder(frame, frame.text:GetTextColor())	
+	--NP:CreateVirtualFrame(frame)	
+	--NP:SetVirtualBorder(frame, frame.text:GetTextColor())	
 	
+	frame.text:FontTemplate(nil, 14, 'OUTLINE')
 	frame:SetClampedToScreen(false)
 	frame.isBubblePowered = true
-	frame:HookScript('OnUpdate', M.UpdateBubbleBorder)
+	--frame:HookScript('OnUpdate', M.UpdateBubbleBorder)
 end
 
 function M:IsChatBubble(frame)
