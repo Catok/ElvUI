@@ -4,9 +4,44 @@ local _, ns = ...
 local ElvUF = ns.oUF
 
 local attributeBlacklist = {["showplayer"] = true, ["showraid"] = true, ["showparty"] = true, ["showsolo"] = true}
+local configEnv
+local originalEnvs = {}
+local overrideFuncs = {}
 
+local function createConfigEnv()
+	if( configEnv ) then return end
+	configEnv = setmetatable({
+		UnitName = function(unit)
+			if unit:find('target') or unit:find('focus') then
+				return UnitName(unit)
+			end
+			if E.DONATORS then
+				local max = #E.DONATORS
+				return E.DONATORS[math.random(1, max)]
+			end
+			return 'Test Name'
+		end,
+		UnitClass = function(unit)
+			if unit:find('target') or unit:find('focus') then
+				return UnitClass(unit)
+			end		
+		
+			local classToken = CLASS_SORT_ORDER[math.random(1, #(CLASS_SORT_ORDER))]
+			return LOCALIZED_CLASS_NAMES_MALE[classToken], classToken
+		end,
+	}, {
+		__index = _G,
+		__newindex = function(tbl, key, value) _G[key] = value end,
+	})
+	
+	overrideFuncs['Elv:getnamecolor'] = ElvUF.Tags.Methods['Elv:getnamecolor']
+	overrideFuncs['Elv:nameshort'] = ElvUF.Tags.Methods['Elv:nameshort']
+	overrideFuncs['Elv:namemedium'] = ElvUF.Tags.Methods['Elv:namemedium']
+	overrideFuncs['Elv:namelong'] = ElvUF.Tags.Methods['Elv:namelong']
+end
 
 function UF:ForceShow(frame)
+	if InCombatLockdown() then return; end
 	if not frame.isForced then		
 		frame.oldUnit = frame.unit
 		frame.unit = 'player'
@@ -23,6 +58,7 @@ function UF:ForceShow(frame)
 end
 
 function UF:UnforceShow(frame)
+	if InCombatLockdown() then return; end
 	if not frame.isForced then
 		return
 	end
@@ -34,7 +70,6 @@ function UF:UnforceShow(frame)
 	RegisterUnitWatch(frame)
 	
 	frame.unit = frame.oldUnit or frame.unit
-	
 	-- If we're visible force an update so everything is properly in a
 	-- non-config mode state
 	if frame:IsVisible() and frame.Update then
@@ -46,6 +81,9 @@ function UF:ShowChildUnits(header, ...)
 	header.isForced = true
 	for i=1, select("#", ...) do
 		local frame = select(i, ...)
+		frame:RegisterForClicks(nil)
+		frame:SetID(i)
+		frame.TargetGlow:SetAlpha(0)
 		self:ForceShow(frame)
 	end
 end
@@ -54,6 +92,8 @@ function UF:UnshowChildUnits(header, ...)
 	header.isForced = nil
 	for i=1, select("#", ...) do
 		local frame = select(i, ...)
+		frame:RegisterForClicks('AnyUp')
+		frame.TargetGlow:SetAlpha(1)
 		self:UnforceShow(frame)
 	end
 end
@@ -70,6 +110,9 @@ local function OnAttributeChanged(self, name)
 end
 
 function UF:HeaderConfig(header, configMode)
+	if InCombatLockdown() then return; end
+	
+	createConfigEnv()
 	local db = header.db
 	header.forceShow = configMode
 	header:HookScript('OnAttributeChanged', OnAttributeChanged)
@@ -85,6 +128,13 @@ function UF:HeaderConfig(header, configMode)
 		local maxUnits = MAX_RAID_MEMBERS
 		OnAttributeChanged(header)
 		UF:ShowChildUnits(header, header:GetChildren())
+
+		for _, func in pairs(overrideFuncs) do
+			if type(func) == 'function' then
+				originalEnvs[func] = getfenv(func)
+				setfenv(func, configEnv)		
+			end
+		end
 		
 		header:Update()	
 	else
@@ -98,6 +148,12 @@ function UF:HeaderConfig(header, configMode)
 		
 		header:SetAttribute("startingIndex", 1)
 		UF:UnshowChildUnits(header, header:GetChildren())
+		
+		for func, env in pairs(originalEnvs) do
+			setfenv(func, env)
+			originalEnvs[func] = nil
+		end		
+		
 		header:Update()
 	end
 end
