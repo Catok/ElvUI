@@ -156,6 +156,8 @@ P['tooltip'] = {
 	['ufhide'] = false,
 	['whostarget'] = true,
 	['combathide'] = false,
+	['mouseOffsetX'] = 0,
+	['mouseOffsetY'] = 0,
 }
 
 --UnitFrame

@@ -60,6 +60,7 @@ end
 function TT:GameTooltip_SetDefaultAnchor(tt, parent)
 	if self.db.anchor == 'CURSOR' then
 		tt:SetOwner(parent, "ANCHOR_CURSOR")	
+		TT:AnchorFrameToMouse(tt);
 		
 		if InCombatLockdown() and E.db.tooltip.combathide then
 			tt:Hide()
@@ -259,9 +260,10 @@ function TT:Colorize(tt)
 			local r, g, b = GetItemQualityColor(quality)
 			tt:SetBackdropBorderColor(r, g, b)
 		else
+			r, g, b = 0.55, 0.57, 0.61
 			tt:SetBackdropBorderColor(unpack(E["media"].bordercolor))
 			GameTooltipStatusBar.backdrop:SetBackdropBorderColor(unpack(E["media"].bordercolor))
-			GameTooltipStatusBar:ColorBar(unpack(E["media"].bordercolor))	
+			GameTooltipStatusBar:ColorBar(r, g, b)	
 		end
 	end	
 	
@@ -431,12 +433,21 @@ function TT:GameTooltip_OnTooltipSetUnit(tt)
 
 		local offset = 2
 		if guildName then
-			if UnitIsInMyGuild(unit) then
-				GameTooltipTextLeft2:SetText("<"..E["media"].hexvaluecolor..guildName.."|r> ["..E["media"].hexvaluecolor..guildRankName.."|r]")
+			if IsShiftKeyDown() then
+				if UnitIsInMyGuild(unit) then
+					GameTooltipTextLeft2:SetText("<"..E["media"].hexvaluecolor..guildName.."|r> ["..E["media"].hexvaluecolor..guildRankName.."|r]")
+				else
+					GameTooltipTextLeft2:SetText("<|cff00ff10"..guildName.."|r> [|cff00ff10"..guildRankName.."|r]")
+				end
+				offset = offset + 1
 			else
-				GameTooltipTextLeft2:SetText("<|cff00ff10"..guildName.."|r> [|cff00ff10"..guildRankName.."|r]")
+				if UnitIsInMyGuild(unit) then
+					GameTooltipTextLeft2:SetText("<"..E["media"].hexvaluecolor..guildName.."|r>")
+				else
+					GameTooltipTextLeft2:SetText("<|cff00ff10"..guildName.."|r>")
+				end
+				offset = offset + 1
 			end
-			offset = offset + 1
 		end
 
 		for i= offset, lines do
@@ -534,6 +545,8 @@ function TT:GameTooltip_OnUpdate(tt)
 	elseif tt.forceRefresh then
 		tt:FixDimensions()
 		tt.forceRefresh = nil
+	else
+		TT:AnchorFrameToMouse(tt)
 	end
 end
 
@@ -564,6 +577,16 @@ end
 function TT:ContainerFrameItemButton_OnEnter()
 	GameTooltip:FixDimensions()
 end
+
+-- Anchor any given frame to mouse position
+function TT:AnchorFrameToMouse(frame)
+	if frame:GetAnchorType() ~= "ANCHOR_CURSOR" then return end
+	local x, y = GetCursorPosition();
+	local effScale = frame:GetEffectiveScale();
+	frame:ClearAllPoints();
+	frame:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",(x / effScale + E.db.tooltip.mouseOffsetX),(y / effScale + E.db.tooltip.mouseOffsetY));
+
+	end
 
 function TT:Initialize()
 	self.db = E.db["tooltip"]

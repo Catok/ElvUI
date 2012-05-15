@@ -57,6 +57,26 @@ E.Options.args.tooltip = {
 					name = L["Combat Hide"],
 					desc = L["Hide tooltip while in combat."],
 				},
+				mouseOffsetX = {
+					order = 5,
+					type = 'range',
+					name = L['Tooltip X-offset'],
+					desc = L['Offset the tooltip on the X-axis.'],
+					min = -100, max = 100, step = 1,
+					set = function(info, value) 
+						E.db.tooltip[ info[#info] ] = value 
+					end,
+				},
+				mouseOffsetY = {
+					order = 6,
+					type = 'range',
+					name = L['Tooltip Y-offset'],
+					desc = L['Offset the tooltip on the Y-axis.'],
+					min = -100, max = 100, step = 1,
+					set = function(info, value) 
+						E.db.tooltip[ info[#info] ] = value 
+					end,
+				},
 			},
 		},
 	},
