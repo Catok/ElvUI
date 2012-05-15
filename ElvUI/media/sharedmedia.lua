@@ -15,6 +15,7 @@ LSM:Register("font","ElvUI Alt-Combat", [[Interface\AddOns\ElvUI\media\fonts\Die
 LSM:Register("sound","ElvUI Warning", [[Interface\AddOns\ElvUI\media\sounds\warning.mp3]])
 LSM:Register("sound","ElvUI Whisper", [[Interface\AddOns\ElvUI\media\sounds\whisper.mp3]])
 -----------------
+LSM:Register("statusbar","Plain White", [[Interface\AddOns\ElvUI\media\textures\plain_white.tga]])
 LSM:Register("border", "TP_HealthBarOverlayThin", [[Interface\AddOns\ElvUI\media\textures\TP_HealthBarOverlayThin.tga]])
 LSM:Register("border", "TP_HealthBarHighlight", [[Interface\AddOns\ElvUI\media\textures\TP_HealthBarHighlight.tga]])
 LSM:Register("border", "shadowBorder", [[Interface\AddOns\ElvUI\media\textures\shadowBorder.tga]])

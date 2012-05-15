@@ -298,7 +298,7 @@ function NP:SkinPlate(frame)
 		frame.hp.hpbg:SetAllPoints(frame.hp)
 		frame.hp.hpbg:SetTexture(1,1,1,0.25) 				
 	end
-	frame.hp:SetStatusBarTexture(E["media"].normTex)
+	frame.hp:SetStatusBarTexture(E["media"].npTex)
 	self:SetVirtualBackdrop(frame.hp, unpack(E["media"].backdropcolor))
 	
 	--Level Text
@@ -789,7 +789,9 @@ function NP:UpdateAllPlates()
 end
 
 function NP:ZONE_CHANGED_NEW_AREA()
-	NP.ByName = {}
+	wipe(NP.ByName)
+	wipe(NP.GUIDLockouts)
+	wipe(NP.GUIDDR)
 end
 
 function NP:HookFrames(...)

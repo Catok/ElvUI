@@ -54,6 +54,7 @@ function E:UpdateMedia()
 	self["media"].blankTex = LSM:Fetch("background", "ElvUI Blank")
 	self["media"].normTex = LSM:Fetch("statusbar", self.private['general'].normTex)
 	self["media"].glossTex = LSM:Fetch("statusbar", self.private['general'].glossTex)
+	self["media"].npTex = LSM:Fetch("statusbar", "Plain White")
 
 	--Border Color
 	local border = self.db['general'].bordercolor

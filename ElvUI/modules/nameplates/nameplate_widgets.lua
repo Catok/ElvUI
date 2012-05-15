@@ -223,7 +223,7 @@ function NP:UpdateAuraTime(frame, expiration, duration)
 		flashTime = E.global['nameplate']['spellListDefault']['flashTime']
 	end
 	
-	if timeLeft <= flashTime and duration >= flashTime then 
+	if timeLeft <= flashTime and duration >= flashTime and not flashTime == 0 then 
 		if not UIFrameIsFlashing(frame) then
 			UIFrameFlash(frame, 0.5, 0.5, timeLeft, false, 0.3, 0.01, 1)
 		end
@@ -253,7 +253,7 @@ function NP:UpdateAuraContext(frame)
 	frame.guidcache = guid
 	
 	AuraList[frame] = true
-	if guid then AuraGUID[guid] = frame end
+	--if guid then AuraGUID[guid] = frame end
 	
 	if parent.isTarget then UpdateAurasByUnitID("target")
 	elseif parent.isMouseover then UpdateAurasByUnitID("mouseover") end
