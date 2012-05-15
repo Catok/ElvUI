@@ -407,6 +407,7 @@ E.Options.args.unitframe = {
 								['NONE'] = L['None'],
 								['OUTLINE'] = 'OUTLINE',
 								['MONOCHROME'] = 'MONOCHROME',
+								['MONOCHROMEOUTLINE'] = 'MONOCROMEOUTLINE',
 								['THICKOUTLINE'] = 'THICKOUTLINE',
 							},
 							set = function(info, value) E.db.unitframe[ info[#info] ] = value; UF:Update_FontStrings() end,
@@ -5026,7 +5027,7 @@ E.Options.args.unitframe.args.party = {
 					type = 'select',		
 					values = {
 						['CLASS'] = CLASS,
-						['TANK'] = L["MT, MA First"],
+						['ROLE'] = L["MT, MA First"],
 						['GROUP'] = GROUP,
 					},
 				},
@@ -5678,7 +5679,7 @@ E.Options.args.unitframe.args.raid625 = {
 					type = 'select',		
 					values = {
 						['CLASS'] = CLASS,
-						['TANK'] = L["MT, MA First"],
+						['ROLE'] = L["MT, MA First"],
 						['GROUP'] = GROUP,
 					},
 				},			
@@ -6250,7 +6251,7 @@ E.Options.args.unitframe.args.raid2640 = {
 					type = 'select',		
 					values = {
 						['CLASS'] = CLASS,
-						['TANK'] = L["MT, MA First"],
+						['ROLE'] = L["MT, MA First"],
 						['GROUP'] = GROUP,
 					},
 				},		
