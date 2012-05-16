@@ -1561,6 +1561,14 @@ G["nameplate"]["spellListDefault"] = {
 			["visibility"] = 1,
 			["width"] = 36,
 		},
+		["Intimidation"] = {
+			["lockAspect"] = true,
+			["flashTime"] = 0,
+			["height"] = 36,
+			["text"] = 16,
+			["visibility"] = 1,
+			["width"] = 36,
+		},
 		["Kidney Shot"] = {
 			["lockAspect"] = true,
 			["flashTime"] = 0,
