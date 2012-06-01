@@ -42,6 +42,10 @@ function UF:Construct_PartyFrames(unitGroup)
 		self.RaidIcon = UF:Construct_RaidIcon(self)
 		self.ReadyCheck = UF:Construct_ReadyCheckIcon(self)
 		self.HealPrediction = UF:Construct_HealComm(self)
+		
+		self.Castbar = UF:Construct_Castbar(self, 'LEFT')
+		self.Castbar.SafeZone = nil
+		self.Castbar.LatencyTexture:Hide()
 	end
 	
 	UF:Update_PartyFrames(self, E.db['unitframe']['units']['party'])
@@ -520,6 +524,29 @@ function UF:Update_PartyFrames(frame, db)
 				frame:DisableElement('HealPrediction')	
 			end
 		end	
+		
+		--Castbar
+		do
+			local castbar = frame.Castbar
+			castbar:Width(100)
+			castbar:Height(10)
+
+			--Icon
+			castbar.ButtonIcon.bg:Hide()
+			castbar.Icon = nil
+
+			castbar.Spark:Show()
+
+			
+			castbar:ClearAllPoints()
+			castbar:Point("TOPRIGHT", frame, "TOPRIGHT", -(BORDER), (-(BORDER*2+BORDER)))
+			
+			--if db.castbar.enable and not frame:IsElementEnabled('Castbar') then
+				frame:EnableElement('Castbar')
+			--elseif not db.castbar.enable and frame:IsElementEnabled('Castbar') then
+			--	frame:DisableElement('Castbar')	
+			--end			
+		end
 		
 		UF:UpdateAuraWatch(frame)
 	end

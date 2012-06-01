@@ -80,7 +80,7 @@ local function UpdateFilterGroup()
 				type = 'range',
 				name = L['Custom Scale'],
 				desc = L['Set the scale of the nameplate.'],
-				min = 0.67, max = 2, step = 0.01,
+				min = 0.3, max = 2, step = 0.01,
 				get = function(info) return E.global["nameplate"]['filter'][selectedFilter][ info[#info] ] end,
 				set = function(info, value) E.global["nameplate"]['filter'][selectedFilter][ info[#info] ] = value; UpdateFilterGroup() end,						
 			},
