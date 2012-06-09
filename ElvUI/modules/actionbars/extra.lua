@@ -34,5 +34,5 @@ function AB:SetupExtraButton()
 	button.style:SetTexture("")
 	hooksecurefunc(texture, "SetTexture", disableTexture)
 	
-	self:CreateMover(holder, 'BossButton', 'BossButton');
+	E:CreateMover(holder, 'BossButton', 'Boss Button');
 end

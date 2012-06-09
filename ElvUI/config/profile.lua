@@ -15,13 +15,13 @@ P['general'] = {
 	['autoAcceptInvite'] = false,
 	
 	-- fonts
-	["fontsize"] = 12,
-	["font"] = "ElvUI Font",
+	["fontsize"] = 11,
+	["font"] = "ElvUI Pixel",
 	
 	--colors
-	["bordercolor"] = { r = .31,g = .31,b = .31 },
-	["backdropcolor"] = { r = .1,g = .1,b = .1 },
-	["backdropfadecolor"] = { r = .06,g = .06,b = .06, a = 0.9 },
+	["bordercolor"] = { r = 0.1,g = 0.1,b = 0.1 },
+	["backdropcolor"] = { r = 0.1,g = 0.1,b = 0.1 },
+	["backdropfadecolor"] = { r = .054,g = .054,b = .054, a = 0.8 },
 	["valuecolor"] = {r = 23/255,g = 132/255,b = 209/255},
 	
 	--panels
@@ -97,6 +97,7 @@ P['chat'] = {
 	['font'] = 'ElvUI Font',
 	['fontoutline'] = 'NONE',
 	['sticky'] = true,
+	['keywords'] = '%MYNAME%, ElvUI'
 }
 
 --ClassTimers
@@ -164,9 +165,9 @@ P['tooltip'] = {
 P['unitframe'] = {
 	['smoothbars'] = true,
 	['statusbar'] = "Minimalist",
-	['font'] = 'ElvUI Font',
-	['fontsize'] = 12,
-	['fontoutline'] = 'OUTLINE',
+	['font'] = 'ElvUI Pixel',
+	['fontsize'] = 10,
+	['fontoutline'] = 'MONOCHROMEOUTLINE',
 	['OORAlpha'] = 0.35,
 	['debuffHighlighting'] = true,
 	["smartRaidFilter"] = true,
@@ -885,9 +886,93 @@ P['unitframe'] = {
 				['yOffset'] = 0,
 			},				
 		},
-		['raid625'] = {
+		['raid10'] = {
 			['enable'] = true,
-			['visibility'] = '[@raid6,noexists][@raid26,exists] hide;show',
+			['visibility'] = '[@raid6,noexists][@raid11,exists] hide;show',
+			['point'] = 'LEFT',
+			['maxColumns'] = 2,
+			['unitsPerColumn'] = 5,
+			['columnSpacing'] = 3,
+			['xOffset'] = 3,
+			['yOffset'] = -3,
+			['groupBy'] = 'GROUP',
+			["showParty"] = true,
+			["showRaid"] = true,
+			["showSolo"] = false,
+			["showPlayer"] = true,
+			['healPrediction'] = false,
+			['columnAnchorPoint'] = "TOP",
+			['width'] = 80,
+			['height'] = 44,
+			['health'] = {
+				['text'] = true,
+				['text_format'] = 'deficit',
+				['position'] = 'BOTTOM',
+				['orientation'] = 'HORIZONTAL',
+				['frequentUpdates'] = false,
+			},
+			['power'] = {
+				['enable'] = true,
+				['text'] = false,
+				['text_format'] = 'current',	
+				['width'] = 'fill',
+				['height'] = 7,
+				['offset'] = 0,
+				['position'] = 'BOTTOMRIGHT',
+				['hideonnpc'] = false,					
+			},			
+			['name'] = {
+				['enable'] = true,
+				['position'] = 'TOP',
+				['length'] = 'SHORT',
+			},
+			['buffs'] = {
+				['enable'] = false,
+				['perrow'] = 3,
+				['numrows'] = 1,
+				['growth-x'] = 'LEFT',
+				['growth-y'] = 'DOWN',
+				['initialAnchor'] = 'RIGHT',
+				['attachTo'] = 'FRAME',
+				['anchorPoint'] = 'LEFT',					
+				['fontsize'] = 10,
+				['showPlayerOnly'] = false,
+				['useFilter'] = '',		
+				['durationLimit'] = 0,
+			},
+			['debuffs'] = {
+				['enable'] = false,
+				['perrow'] = 3,
+				['numrows'] = 1,
+				['growth-x'] = 'RIGHT',
+				['growth-y'] = 'DOWN',
+				['initialAnchor'] = 'LEFT',
+				['attachTo'] = 'FRAME',
+				['anchorPoint'] = 'RIGHT',					
+				['fontsize'] = 10,
+				['showPlayerOnly'] = false,
+				['useFilter'] = '',	
+				['durationLimit'] = 0,
+			},	
+			['buffIndicator'] = {
+				['enable'] = true,
+				['size'] = 6,
+				['fontsize'] = 8,
+				['colorIcons'] = true,
+			},
+			['rdebuffs'] = {
+				['enable'] = true,
+				['fontsize'] = 10,
+				['size'] = 26,
+			},
+			['roleIcon'] = {
+				['enable'] = true,
+				['position'] = 'BOTTOMRIGHT',
+			},					
+		},			
+		['raid25'] = {
+			['enable'] = true,
+			['visibility'] = '[@raid11,noexists][@raid26,exists] hide;show',
 			['point'] = 'LEFT',
 			['maxColumns'] = 5,
 			['unitsPerColumn'] = 5,
@@ -965,11 +1050,11 @@ P['unitframe'] = {
 				['size'] = 26,
 			},
 			['roleIcon'] = {
-				['enable'] = false,
+				['enable'] = true,
 				['position'] = 'BOTTOMRIGHT',
 			},					
 		},					
-		['raid2640'] = {
+		['raid40'] = {
 			['enable'] = true,
 			['visibility'] = '[@raid26,noexists] hide;show',
 			['point'] = 'LEFT',
@@ -1043,7 +1128,7 @@ P['unitframe'] = {
 				['size'] = 22,
 			},
 			['roleIcon'] = {
-				['enable'] = false,
+				['enable'] = true,
 				['position'] = 'BOTTOMRIGHT',
 			},				
 			['buffIndicator'] = {
@@ -1074,6 +1159,7 @@ P["actionbar"] = {
 	['fontsize'] = 11,
 	["enablecd"] = true,
 	["treshold"] = 3,
+	['useMaxPaging'] = false,
 	["expiringcolor"] = { r = 1, g = 0, b = 0 },
 	["secondscolor"] = { r = 1, g = 1, b = 0 },
 	["minutescolor"] = { r = 1, g = 1, b = 1 },

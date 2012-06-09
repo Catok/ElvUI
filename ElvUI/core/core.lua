@@ -223,7 +223,6 @@ function E:RefreshModulesDB()
 	local UF = self:GetModule('UnitFrames')
 	table.wipe(UF.db)
 	UF.db = self.db.unitframe
-	ElvUF:ResetDB()
 end
 
 function E:InitializeModules()	
@@ -525,7 +524,6 @@ function E:UpdateAll()
 	local AB = self:GetModule('ActionBars')
 	AB.db = self.db.actionbar
 	AB:UpdateButtonSettings()
-	AB:SetMoverPositions()
 	 
 	local bags = E:GetModule('Bags'); 
 	bags:Layout(); 
@@ -552,8 +550,6 @@ function E:UpdateAll()
 	local UF = self:GetModule('UnitFrames')
 	UF.db = self.db.unitframe
 	UF:Update_AllFrames()
-	ElvUF:ResetDB()
-	ElvUF:PositionUF()
 	
 	self:GetModule('Auras').db = self.db.auras
 	self:GetModule('Tooltip').db = self.db.tooltip
@@ -687,42 +683,17 @@ function E:MoveUI(override, type)
 	elseif ElvUIMoverPopupWindow then
 		ElvUIMoverPopupWindow:Hide()
 	end
-	
-	if type == 'unitframes' and self.UnitFrames then
-		ElvUF:MoveUF(toggle)
-		return
-	elseif type == 'actionbars' and self.ActionBars then
-		self.ActionBars:ToggleMovers(toggle)
-		return
-	end
-	
+
 	self:ToggleMovers(toggle)
-	
-	if self.UnitFrames then
-		ElvUF:MoveUF(toggle)
-	end
-	
-	if self.ActionBars then
-		self.ActionBars:ToggleMovers(toggle)
-	end	
 end
 
 function E:ResetAllUI()
 	self:ResetMovers()
-	
-	if self.UnitFrames then
-		ElvUF:ResetUF()	
-	end
-	
-	if self.ActionBars then
-		self.ActionBars:ResetMovers('')
-	end	
 
 	if E.db.lowresolutionset then
 		E:SetupResolution()
 	end	
-	
-	
+
 	if E.db.layoutSet then
 		E:SetupLayout(E.db.layoutSet)
 	end
@@ -737,14 +708,6 @@ function E:ResetUI(...)
 	end
 	
 	self:ResetMovers(...)
-	
-	if self.UnitFrames then
-		ElvUF:ResetUF(...)	
-	end
-	
-	if self.ActionBars then
-		self.ActionBars:ResetMovers(...)
-	end	
 end
 
 local f = CreateFrame('Frame')
