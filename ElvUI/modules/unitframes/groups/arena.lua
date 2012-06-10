@@ -28,7 +28,7 @@ function UF:Construct_ArenaFrames(frame)
 	
 	frame.Talents = self:Construct_Talents(frame)
 
-	ArenaHeader:Point('BOTTOMRIGHT', E.UIParent, 'RIGHT', -105, -165) 
+	ArenaHeader:Point('LEFT', E.UIParent, 'TOPLEFT', 309, 39) 
 	E:CreateMover(ArenaHeader, ArenaHeader:GetName()..'Mover', 'Arena Frames')
 end
 

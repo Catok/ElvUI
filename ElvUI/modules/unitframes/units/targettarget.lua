@@ -16,7 +16,7 @@ function UF:Construct_TargetTargetFrame(frame)
 	frame.RaidIcon = UF:Construct_RaidIcon(frame)
 	frame.Debuffs = self:Construct_Debuffs(frame)
 	
-	frame:Point('BOTTOM', E.UIParent, 'BOTTOM', 0, 75) --Set to default position
+	frame:Point('BOTTOM', E.UIParent, 'BOTTOM', 360, 202) --Set to default position
 	E:CreateMover(frame, frame:GetName()..'Mover', 'TargetTarget Frame')
 end
 

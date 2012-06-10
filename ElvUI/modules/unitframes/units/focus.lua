@@ -22,7 +22,7 @@ function UF:Construct_FocusFrame(frame)
 	frame.Debuffs = self:Construct_Debuffs(frame)
 	frame.HealPrediction = self:Construct_HealComm(frame)
 	
-	frame:Point('BOTTOMRIGHT', ElvUF_Target, 'TOPRIGHT', 0, 220)
+	frame:Point('TOPRIGHT', E.UIParentRIGHT, 'TOP', 419, -294)
 	E:CreateMover(frame, frame:GetName()..'Mover', 'Focus Frame')
 end
 

@@ -21,7 +21,7 @@ function UF:Construct_PetFrame(frame)
 	
 	frame.HealPrediction = self:Construct_HealComm(frame)
 	
-	frame:Point('BOTTOM', E.UIParent, 'BOTTOM', 0, 118)
+	frame:Point('BOTTOM', E.UIParent, 'BOTTOM', -360, 202)
 	E:CreateMover(frame, frame:GetName()..'Mover', 'Pet Frame')
 end
 

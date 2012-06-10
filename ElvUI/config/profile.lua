@@ -15,11 +15,11 @@ P['general'] = {
 	['autoAcceptInvite'] = false,
 	
 	-- fonts
-	["fontsize"] = 11,
-	["font"] = "ElvUI Pixel",
+	["fontsize"] = 12,
+	["font"] = "ElvUI Font",
 	
 	--colors
-	["bordercolor"] = { r = 0.1,g = 0.1,b = 0.1 },
+	["bordercolor"] = { r = 0.2,g = 0.2,b = 0.2 },
 	["backdropcolor"] = { r = 0.1,g = 0.1,b = 0.1 },
 	["backdropfadecolor"] = { r = .054,g = .054,b = .054, a = 0.8 },
 	["valuecolor"] = {r = 23/255,g = 132/255,b = 209/255},
