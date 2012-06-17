@@ -68,7 +68,7 @@ P["nameplate"] = {
 	["enhancethreat"] = true,
 	["combat"] = false,
 	["showhealth"] = false,
-	["trackauras"] = false,
+	["trackauras"] = true,
 	["trackfilter"] = 'CCDebuffs',
 	['goodscale'] = 1,
 	['badscale'] = 1,
@@ -149,6 +149,7 @@ P['datatexts'] = {
 	},
 	['localtime'] = true,
 	['time24'] = false,
+	['battleground'] = true,
 }
 
 --Tooltip
@@ -1071,9 +1072,9 @@ P['unitframe'] = {
 			['healPrediction'] = false,
 			['columnAnchorPoint'] = "TOP",
 			['width'] = 80,
-			['height'] = 36,
+			['height'] = 26,
 			['health'] = {
-				['text'] = true,
+				['text'] = false,
 				['text_format'] = 'deficit',
 				['position'] = 'BOTTOM',
 				['orientation'] = 'HORIZONTAL',
@@ -1091,7 +1092,7 @@ P['unitframe'] = {
 			},			
 			['name'] = {
 				['enable'] = true,
-				['position'] = 'TOP',
+				['position'] = 'CENTER',
 				['length'] = 'SHORT',
 			},
 			['buffs'] = {
@@ -1128,7 +1129,7 @@ P['unitframe'] = {
 				['size'] = 22,
 			},
 			['roleIcon'] = {
-				['enable'] = true,
+				['enable'] = false,
 				['position'] = 'BOTTOMRIGHT',
 			},				
 			['buffIndicator'] = {

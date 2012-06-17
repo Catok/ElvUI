@@ -255,6 +255,10 @@ function E:SetupLayout(layout, noDataReset)
 			E.db.unitframe.units.raid25.health.frequentUpdates = true;
 			E.db.unitframe.units.raid40.health.frequentUpdates = true;
 			
+			E.db.unitframe.units.raid40.height = 36;
+			E.db.unitframe.units.raid40.health.text = true;
+			E.db.unitframe.units.raid40.name.position = 'TOP';
+			E.db.unitframe.units.raid40.roleIcon.enable = true;
 			E.db.unitframe.units.boss.width = 200;
 			E.db.unitframe.units.boss.castbar.width = 200;
 			E.db.unitframe.units.arena.width = 200;
@@ -301,6 +305,7 @@ function E:SetupLayout(layout, noDataReset)
 			E.db.movers.ElvUF_TargetMover = "BOTTOMUIParentBOTTOM305242"
 			E.db.movers.ElvUF_Raid40Mover = "BOTTOMUIParentBOTTOM080"
 			E.db.movers.ElvUF_Raid25Mover = "BOTTOMUIParentBOTTOM080"
+			E.db.movers.ElvUF_Raid10Mover = "BOTTOMUIParentBOTTOM080"
 			E.db.movers.ElvUF_TargetTargetMover = "BOTTOMUIParentBOTTOM305187"
 			E.db.movers.ElvUF_PartyMover = "BOTTOMUIParentBOTTOM0104"
 			E.db.movers.ElvUF_PetMover = "BOTTOMUIParentBOTTOM-305187"
@@ -311,6 +316,7 @@ function E:SetupLayout(layout, noDataReset)
 			E.db.movers.ElvUF_TargetMover = "BOTTOMRIGHTUIParentBOTTOMRIGHT-464242"
 			E.db.movers.ElvUF_Raid40Mover = "BOTTOMUIParentBOTTOM050"
 			E.db.movers.ElvUF_Raid25Mover = "BOTTOMUIParentBOTTOM050"
+			E.db.movers.ElvUF_Raid10Mover = "BOTTOMUIParentBOTTOM050"
 			E.db.movers.ElvUF_TargetTargetMover = "BOTTOMRIGHTUIParentBOTTOMRIGHT-464151"
 			E.db.movers.ElvUF_PartyMover = "BOTTOMUIParentBOTTOM074"
 			E.db.movers.ElvUF_PetMover = "BOTTOMLEFTUIParentBOTTOMLEFT464151"
@@ -473,7 +479,7 @@ local function SetPage(PageNum)
 		end
 		
 		InstallOption1Button:Show()
-		InstallOption1Button:SetScript("OnClick", E.SetupResolution)
+		InstallOption1Button:SetScript('OnClick', function() E.SetupResolution('high') end)
 		InstallOption1Button:SetText(L["High Resolution"])	
 		InstallOption2Button:Show()
 		InstallOption2Button:SetScript('OnClick', function() E.SetupResolution('low') end)
