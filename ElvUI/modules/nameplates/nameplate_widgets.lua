@@ -468,6 +468,7 @@ function NP:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, ...)
 	
 	if event == 'SPELL_AURA_APPLIED' or event == 'SPELL_HEAL' or event == 'SPELL_DAMAGE' or event == 'SPELL_MISS' then
 		self.GUIDIgnoreCast[sourceGUID] = spellName;
+	end
 	
 	if bit.band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 and bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then
 		isPvP = true
