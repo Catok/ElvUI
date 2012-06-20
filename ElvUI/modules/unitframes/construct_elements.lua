@@ -619,6 +619,7 @@ function UF:Construct_Talents(frame)
 	Talents:Point('TOPRIGHT', frame.Health, 0, 8)
 	
 	return Talents
+end
 
 function UF:Construct_RaidRoleFrames(frame)
 	local anchor = CreateFrame('Frame', nil, frame)

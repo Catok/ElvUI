@@ -550,6 +550,7 @@ function UF:Update_PartyFrames(frame, db)
 			--elseif not db.castbar.enable and frame:IsElementEnabled('Castbar') then
 			--	frame:DisableElement('Castbar')	
 			--end			
+		end
 
 		--Raid Roles
 		do
