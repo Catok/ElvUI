@@ -73,6 +73,9 @@ V['skins'] = {
 	['clcprot'] = {
 		['enable'] = true,
 	},			
+	['clique'] = {
+		['enable'] = true,
+	},
 	['blizzard'] = {
 		['enable'] = true,
 		["bags"] = true,

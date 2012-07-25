@@ -532,24 +532,19 @@ function UF:Update_PartyFrames(frame, db)
 		--Castbar
 		do
 			local castbar = frame.Castbar
-			castbar:Width(100)
-			castbar:Height(10)
+			castbar:Width(UNIT_WIDTH-(BORDER*2))
+			castbar:Height(9)
 
 			--Icon
 			castbar.ButtonIcon.bg:Hide()
 			castbar.Icon = nil
 
 			castbar.Spark:Show()
-
-			
 			castbar:ClearAllPoints()
-			castbar:Point("TOPRIGHT", frame, "TOPRIGHT", -(BORDER), (-(BORDER*2+BORDER)))
+			castbar:Point("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(BORDER), (-(BORDER*2+BORDER))+18)
 			
-			--if db.castbar.enable and not frame:IsElementEnabled('Castbar') then
-				frame:EnableElement('Castbar')
-			--elseif not db.castbar.enable and frame:IsElementEnabled('Castbar') then
-			--	frame:DisableElement('Castbar')	
-			--end			
+			frame:EnableElement('Castbar')
+
 		end
 
 		--Raid Roles
